@@ -1,3 +1,4 @@
+-- Comments
 Insert overwrite table la_14d_shipment_fact
 select distinct
 sv.shipment_id,
