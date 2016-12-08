@@ -1,0 +1,54 @@
+#### Initial Configuration
+-------------------------------------------------------------------------------------------------------------------
+
+git config --global user.name "somsubhra88"
+git config --global email "somsubhra.g@flipkart.com"
+git config --list
+-------------------------------------------------------------------------------------------------------------------
+
+#### Clone the Repository
+-------------------------------------------------------------------------------------------------------------------
+git clone https://github.com/somsubhra88/eKart_large_fact.git
+-------------------------------------------------------------------------------------------------------------------
+
+#### Making Changes
+-------------------------------------------------------------------------------------------------------------------
+git pull origin master
+### Make the changes in the code
+- Put all the changes to staging directory
+git add -A
+- In case if you want to undo the changes
+git reset
+- Commit it with a message
+git commit -m "Put a message so that everyone"
+- Making the changes in Server as well
+git push
+-------------------------------------------------------------------------------------------------------------------
+
+#### Creating Branches
+-------------------------------------------------------------------------------------------------------------------
+- Creation of New Branch
+git branch <name>
+- Changing Working Branch
+git checkout <name>
+# Make the changes in the code
+- Put all the changes to staging directory
+git add -A
+- Commit it with a message
+git commit -m "Put a message so that everyone"
+- Push the New Branches into Server
+git push -u origin <branch-name>
+- Checking all the branches
+git branch -a
+
+- Change the working Branch back to Master
+git checkout master
+- Pull all the codes so that all the locally modified code merged with recent updated code
+git pull origin master
+- Merging the new Branch to master
+git branch --merged
+
+- Deleting the Branch
+git branch -d <branch-name>
+- Making the changes in Server as well
+git push origin --delete <branch-name>
