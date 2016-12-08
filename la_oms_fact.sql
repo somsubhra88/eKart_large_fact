@@ -1,3 +1,4 @@
+--comment
 INSERT overwrite TABLE la_oms_fact
 SELECT DISTINCT order_item_unit_id,
                 order_item_id,
