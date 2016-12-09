@@ -431,7 +431,7 @@ TRID AS tracking_id ,
 min(`data`.connection_estimated_tat) AS eta_in_sec ,
 min(`data`.eta) as eta_datatime ,
 min(unix_timestamp(`data`.created_at)) AS first_time
-FROM bigfoot_snapshot.dart_wsr_scp_ekl_shipmentgroup_3_view_total LATERAL VIEW explode(`data`.shipments) exploded_table AS TRID
+FROM bigfoot_journal.dart_wsr_scp_ekl_shipmentgroup_3 LATERAL VIEW explode(`data`.shipments) exploded_table AS TRID
 WHERE `data`.type = 'consignment'
 AND `data`.source_location.id IN ( 599 ,
 600 ,
