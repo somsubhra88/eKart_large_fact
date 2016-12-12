@@ -13,10 +13,8 @@ SELECT A.vendor_tracking_id AS vendor_tracking_id,
        'Null' AS first_conn,
        A.tpt_compliance_flag AS tpt_compliance_flag,
        if(A.actual_dh_recieve_date_time IS NOT NULL, if(A.actual_dh_recieve_date_time<=A.shipment_tpt_dh_eta_datetime,0,1),if(from_unixtime(unix_timestamp())>A.shipment_tpt_dh_eta_datetime,1,0)) AS tpt_intransit_breach_flag,
-       if(A.actual_dh_recieve_date_time IS NOT NULL, if(A.actual_dh_recieve_date_time<=A.shipment_tpt_dh_eta_datetime_calculated,0,1),if(from_unixtime(unix_timestamp())>A.shipment_tpt_dh_eta_datetime_calculated,1,0)) AS tpt_intransit_breach_flag_calc,
        A.Conn_eta_in_sec AS conn_eta_in_sec,
        A.shipment_tpt_dh_eta_datetime AS shipment_tpt_dh_eta_datetime,
-       A.shipment_tpt_dh_eta_datetime_calculated AS shipment_tpt_dh_eta_datetime_calculated,
        lookup_date(to_date(A.shipment_tpt_dh_eta_datetime)) AS shipment_tpt_dh_eta_date_key,
        A.fulfill_item_unit_dispatch_expected_time AS fulfill_item_unit_dispatch_expected_time,
        A.fulfill_item_unit_dispatch_actual_time AS fulfill_item_unit_dispatch_actual_time,
@@ -39,7 +37,6 @@ FROM
           if(isnull(Sh.shipment_last_consignment_conn_id)
              AND not(isnull(Sh.shipment_last_consignment_id)) ,1,0) AS tpt_compliance_flag,
           Sh.shipment_last_consignment_eta_in_sec AS Conn_eta_in_sec,
-          Sh.shipment_last_consignment_eta_datetime AS shipment_tpt_dh_eta_datetime,
 		  CASE 
 		  WHEN ff.fulfill_item_unit_is_for_slotted_delivery='NotSlotted' THEN concat(substr(ff.fulfill_item_unit_delivered_status_expected_date_key,1,4),'-',substr(ff.fulfill_item_unit_delivered_status_expected_date_key,5,2),'-',substr(ff.fulfill_item_unit_delivered_status_expected_date_key,7,2),' 06:00:00')
 		  WHEN ff.fulfill_item_unit_is_for_slotted_delivery='Slotted' 
@@ -49,7 +46,7 @@ FROM
 		  unix_timestamp(Sh.shipment_last_consignment_eta_datetime),
 		  unix_timestamp(ff.dispatch_max_time) + 7200 + unix_timestamp(Sh.shipment_last_consignment_eta_datetime) - unix_timestamp(Sh.shipment_first_consignment_create_datetime)
 		  ))
-		  END AS shipment_tpt_dh_eta_datetime_calculated,
+		  END AS shipment_tpt_dh_eta_datetime,
 		  Sh.shipment_last_consignment_create_datetime AS Actual_cons_created_at,
           ff.fulfill_item_unit_dispatch_expected_time AS fulfill_item_unit_dispatch_expected_time,
           ff.fulfill_item_unit_dispatch_actual_time AS fulfill_item_unit_dispatch_actual_time,
