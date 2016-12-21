@@ -359,6 +359,7 @@ SELECT
 			mh_promise_datetime,
 			shipment_tpt_dh_eta_datetime,
 			lzn_classification,
+			lzn_tat_target,
 			pd_new_customer_breach,
 			pd_new_fk_triggered_rto,
 			pe_shipment_condition_breach,
@@ -425,7 +426,10 @@ SELECT
 					ELSE shipment_breach_bucket
 				END
 			) END
-			AS pd_imperfection_bucket	
+			AS pd_imperfection_bucket,
+			rvp_promise_date_key,
+			rvp_complete_date_key,
+			rvp_breach_flag				
 		FROM
 			(
 				SELECT
@@ -714,7 +718,7 @@ SELECT
 						'Delivered by promise',
 						IF(
 							to_date(shipment_first_ofd_datetime) <= to_date(order_item_unit_final_promised_date_use),
-							'Customer_Dependency-Attempted Undelivered',
+							'No Breach-OFD Before LPD-Customer Dependency Attempted',
 							IF(
 								fulfill_item_unit_dispatch_actual_time > fulfill_item_unit_dispatch_expected_time,
 								fc_breach_bucket,
@@ -1062,7 +1066,7 @@ SELECT
 									0,
 									IF(
 										shipment_breach_bucket IN(
-											'Customer_Dependency-Attempted Undelivered',
+											'No Breach-OFD Before LPD-Customer Dependency Attempted',
 											'Customer_Dependency-Attempted Undelivered-3PL'
 										),
 										0,
@@ -1083,7 +1087,7 @@ SELECT
 						),
 						0
 					) AS fk_triggered_customer_breach_flag,
-					CASE WHEN shipment_breach_bucket != 'No Breach-OFD Before LPD' THEN fk_triggered_promise_change_flag ELSE 0 END AS fk_triggered_promise_change_flag,
+					CASE WHEN shipment_breach_bucket != 'No Breach-OFD Before LPD-Customer Dependency Attempted' THEN fk_triggered_promise_change_flag ELSE 0 END AS fk_triggered_promise_change_flag,
 					fk_triggered_cancellation_flag,
 					fk_triggered_return_flag,
 					IF(
@@ -1115,6 +1119,7 @@ SELECT
 					pincode_location_type,
 					is_cpu_vendor,
 					lzn_classification,
+					lzn_tat_target,
 					CASE
 						WHEN ekl_shipment_type = 'forward'
 						AND order_item_unit_is_promised_date_updated = 1
@@ -1126,15 +1131,13 @@ SELECT
 						WHEN ekl_shipment_type = 'forward'
 						AND shipment_breach_bucket NOT IN(
 							'delivered by logistics promise date',
-							'No Breach-OFD Before LPD',
-							'Customer_Dependency-Attempted',
+							'No Breach-OFD Before LPD-Customer Dependency Attempted',
 							'Customer_Dependency-Attempted Undelivered-3PL'
 						) THEN 1
 						WHEN shipment_rto_create_date_key > logistics_promise_date_key
 						AND shipment_breach_bucket NOT IN(
 							'delivered by logistics promise date',
-							'No Breach-OFD Before LPD',
-							'Customer_Dependency-Attempted',
+							'No Breach-OFD Before LPD-Customer Dependency Attempted',
 							'Customer_Dependency-Attempted Undelivered-3PL'
 						) THEN 1
 						ELSE 0
@@ -1190,7 +1193,7 @@ SELECT
 							'shipment_lost',
 							'Untraceable'
 						) 
-						AND shipment_breach_bucket != 'No Breach-OFD Before LPD' THEN 1
+						AND shipment_breach_bucket != 'No Breach-OFD Before LPD-Customer Dependency Attempted' THEN 1
 						ELSE 0
 					END AS pd_fk_triggered_rto_after_lpd,
 					CASE
@@ -1235,7 +1238,11 @@ SELECT
 					) AS order_create_to_delivery_sla_days,
 					picklist_display_id,
 					picklist_created_at,
-					picklist_item_confirmed_at
+					picklist_item_confirmed_at,
+					rvp_promise_date,
+					rvp_promise_date_key,
+					rvp_complete_date_key,
+					IF(rvp_complete_date_key > rvp_promise_date_key,1,0) rvp_breach_flag					
 				FROM
 					(
 						SELECT
@@ -1603,7 +1610,7 @@ SELECT
 										to_date(shipment_first_ofd_datetime) <= to_date(logistics_promise_datetime),
 										IF(
 											fsd_first_undel_customer_dependency_flag = 1,
-											'No Breach-OFD Before LPD',
+											'No Breach-OFD Before LPD-Customer Dependency Attempted',
 											'RCA'
 										),
 										IF(
@@ -1620,7 +1627,7 @@ SELECT
 														'Breach-EKL_DH_ODA',
 														IF(
 															fsd_current_customer_dependency_flag = 1,
-															'Customer_Dependency-Attempted',
+															'Customer_Dependency After LPD Breach',
 															'RCA'
 														)
 													)
@@ -1699,10 +1706,14 @@ SELECT
 							C.pincode_location_type,
 							C.is_cpu_vendor,
 							C.lzn_classification,
+							C.lzn_tat_target,
 							C.vendor_name,
 							C.picklist_display_id,
 							C.picklist_created_at,
-							C.picklist_item_confirmed_at
+							C.picklist_item_confirmed_at,
+							C.rvp_promise_date,
+							C.rvp_promise_date_key,
+							C.rvp_complete_date_key
 						FROM
 							(
 								SELECT
@@ -1927,7 +1938,7 @@ SELECT
 												'not@DH',
 												IF(
 													fsd_first_undel_customer_dependency_flag = 1,
-													'Customer_Dependency-Attempted Undelivered',
+													'No Breach-OFD Before LPD-Customer Dependency Attempted',
 													1
 												)
 											)
@@ -2124,10 +2135,14 @@ SELECT
 									B.pincode_location_type,
 									B.is_cpu_vendor,
 									B.lzn_classification,
+									B.lzn_tat_target,
 									B.vendor_name,
 									B.picklist_display_id,
 									B.picklist_created_at,
-									B.picklist_item_confirmed_at
+									B.picklist_item_confirmed_at,
+									B.rvp_promise_date,
+									B.rvp_promise_date_key,
+									B.rvp_complete_date_key
 								FROM
 									(
 										SELECT
@@ -2610,10 +2625,14 @@ SELECT
 											A.pincode_location_type,
 											A.is_cpu_vendor,
 											A.lzn_classification,
+											A.lzn_tat_target,
 											A.vendor_name,
 											A.picklist_display_id,
 											A.picklist_created_at,
-											A.picklist_item_confirmed_at
+											A.picklist_item_confirmed_at,
+											cast(CONCAT(date_add(cast(A.rvp_created_on as string),rvp_tat.target),substring(cast(A.rvp_created_on as string),11,9)) as timestamp) as rvp_promise_date,
+											lookup_date(to_date(date_add(cast(A.rvp_created_on as string),rvp_tat.target))) as rvp_promise_date_key,
+											A.rvp_complete_date_key
 										FROM
 											(
 												SELECT
@@ -2623,6 +2642,7 @@ SELECT
 													order_tracking.order_item_unit_tracking_id,
 													order_tracking.order_item_unit_shipment_id,
 													order_tracking.tracking_id_type,
+													order_tracking.created_on as rvp_created_on,
 													oms.order_item_unit_id,
 													oms.order_pincode_key,
 													oms.cu_sub_issue_type,
@@ -2817,7 +2837,9 @@ SELECT
 													sh.dummy1 AS pincode_location_type,
 													sh.dummy2 AS is_cpu_vendor,
 													sh.lzn_classification AS lzn_classification,
+													sh.lzn_tat_target As lzn_tat_target,
 													sh.vendor_name,
+													sh.rvp_complete_date_key,
 													rrr_return.exchange_fsn,
 													rrr_return.replacement_order_item_id,
 													rrr_return.tracking_id,
@@ -2861,7 +2883,8 @@ SELECT
 															subset_1.order_item_unit_tracking_id,
 															subset_1.order_item_unit_shipment_id,
 															subset_1.tracking_id_type,
-															subset_1.product_categorization_hive_dim_key
+															subset_1.product_categorization_hive_dim_key,
+															NULL as created_on
 														FROM
 															(
 																SELECT
@@ -2908,7 +2931,8 @@ SELECT
 															return_item. `data` . tracking_id AS order_item_unit_tracking_id,
 															return_item. `data` . shipment_id AS order_item_unit_shipment_id,
 															'reverse' AS tracking_id_type,
-															oms_fct.order_item_product_id_key AS product_categorization_hive_dim_key
+															oms_fct.order_item_product_id_key AS product_categorization_hive_dim_key,
+															return_item. `data` . created_at as created_on
 														FROM
 															bigfoot_snapshot.dart_fkint_scp_rrr_return_4_0_view_total RETURN
 														LEFT OUTER JOIN bigfoot_snapshot.dart_fkint_scp_rrr_return_item_3_0_view_total return_item ON
@@ -2929,7 +2953,8 @@ SELECT
 															subset_3.order_item_unit_tracking_id,
 															subset_3.order_item_unit_shipment_id,
 															subset_3.tracking_id_type,
-															subset_3.product_categorization_hive_dim_key
+															subset_3.product_categorization_hive_dim_key,
+															NULL as created_on
 														FROM
 															(
 																SELECT
@@ -3224,6 +3249,12 @@ SELECT
 													)
 													and pl.reservation_outbound_type = 'customer_reservation'
 											) A
+											LEFT JOIN bigfoot_external_neo.cp_user__address_hive_dim src
+											ON A.order_pincode_key = src.address_hive_dim_key
+											LEFT OUTER JOIN bigfoot_common.la_lzn_classification rvp_tat
+											ON rvp_tat.source_pincode = src.address_pincode
+											AND rvp_tat.shipment_carrier = '3PL'
+											AND UPPER(rvp_tat.tat) = 'REVERSE'
 									) B
 							) C
 					) DA
