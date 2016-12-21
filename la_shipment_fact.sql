@@ -89,7 +89,9 @@ SELECT shipment_id ,
        dummy1 ,
        dummy2 ,
        lzn_classification ,
-       vendor_name
+       lzn_tat_target,
+       vendor_name,
+	   rvp_complete_date_key
 FROM
   (SELECT DISTINCT shipment_id ,
                    vendor_tracking_id ,
@@ -153,7 +155,7 @@ FROM
                    shipment_created_at_datetime ,
                    shipment_last_consignment_create_datetime ,
                    shipment_last_consignment_eta_in_sec ,
-				   shipment_last_consignment_eta_datetime ,
+				           shipment_last_consignment_eta_datetime ,
                    shipment_last_consignment_conn_id ,
                    shipment_first_consignment_create_datetime ,
                    tasklist_tracking_id ,
@@ -181,7 +183,9 @@ FROM
 					pincode_location_type AS dummy1 ,
 					is_cpu_vendor AS dummy2 ,
 					lzn_classification ,
-					vendor_name
+          lzn_tat_target,
+					vendor_name,
+					NULL as rvp_complete_date_key
 			    	FROM
 			    	  ( SELECT sv.entityid AS shipment_id ,
            sv.sv_vendor_tracking_id AS vendor_tracking_id ,
@@ -212,7 +216,7 @@ FROM
               sc.shipment_last_consignment_id ,
               sc.shipment_last_consignment_create_datetime ,
               sc.shipment_last_consignment_eta_in_sec ,
-			  sc.shipment_last_consignment_eta_datetime ,
+			        sc.shipment_last_consignment_eta_datetime ,
               sc.shipment_last_consignment_conn_id ,
               sreh.shipment_inscan_time ,
               sreh.shipment_rto_create_time ,
@@ -294,46 +298,52 @@ IF ( lower(sv.seller_id) = 'wsr' ,
                                                                     1 ,
                                                                     0 ) AS shipment_fragile_flag ,
                              lt.location_type AS pincode_location_type ,
-                             runsheet_details.is_cpu_vendor ,
-                             lzn.lzn_classification AS lzn_classification
+                             runsheet_details.is_cpu_vendor ,	 
+					   IF ( lzn1.lzn_classification IS NOT NULL, lzn1.lzn_classification, lzn2.lzn_classification) as lzn_classification,
+             IF ( lzn1.target IS NOT NULL, lzn1.target, lzn2.target) as lzn_tat_target
+							 
+							 
+							 
    FROM
-( SELECT entityid AS entityid ,
-         `data`.vendor_tracking_id AS sv_vendor_tracking_id ,
-         `data`.STATUS AS shipment_current_status ,
-         updatedat AS updatedat ,
-         `data`.payment_type AS payment_type ,
-         `data`.destination_address.pincode AS dest_address_pincode ,
-         `data`.shipment_type AS shipment_type ,
-         `data`.customer_sla AS customer_sla ,
-         `data`.design_sla AS design_sla ,
-         `data`.created_at AS created_at ,
-         `data`.vendor_id AS vendor_id ,
-         `data`.assigned_address.id AS fsd_assigned_hub_id ,
-         `data`.current_address.id AS fsd_last_current_hub_id ,
-         `data`.current_address.type AS fsd_last_current_hub_type ,
-         `data`.billable_weight AS ekl_billable_weight ,
-         `data`.source_address.id AS source_address_id ,
-         `data`.source_address.pincode AS rvp_origin_geo_id ,
-         `data`.destination_address.id AS destination_address_id ,
-         `data`.shipment_items [0].seller_id AS seller_id ,
-         `data`.payment.payment_details [0].device_id AS pos_id ,
-         `data`.payment.payment_details [0].transaction_id AS transaction_id ,
-         `data`.payment.payment_details [0].agent_id AS agent_id ,
-         `data`.payment.amount_collected.value AS amount_collected ,
-         `data`.source_address.type AS source_address_type ,
-         `data`.destination_address.type AS seller_type ,
-         `data`.attributes AS sv_attribute ,
-         IF ( `data`.shipment_type = 'rvp' ,
-                                     `data`.source_address.pincode ,
-                                     `data`.destination_address.pincode ) AS location_pincode ,
-            IF ( `data`.shipment_type = 'rvp' ,
-                                        `data`.destination_address.pincode ,
-                                        `data`.source_address.pincode ) AS source_address_pincode,
-            IF ( `data`.shipment_type = 'rvp' ,
-                                        `data`.source_address.pincode ,
-                                        `data`.destination_address.pincode ) AS destination_address_pincode
- FROM bigfoot_snapshot.dart_wsr_scp_ekl_shipment_4_view_total
- WHERE ( `data`.source_address.id IN ( 563 ,
+( SELECT sv1.entityid AS entityid ,
+         sv1.`data`.vendor_tracking_id AS sv_vendor_tracking_id ,
+         sv1.`data`.STATUS AS shipment_current_status ,
+         sv1.updatedat AS updatedat ,
+         sv1.`data`.payment_type AS payment_type ,
+         sv1.`data`.destination_address.pincode AS dest_address_pincode ,
+         sv1.`data`.shipment_type AS shipment_type ,
+         sv1.`data`.customer_sla AS customer_sla ,
+         sv1.`data`.design_sla AS design_sla ,
+         sv1.`data`.created_at AS created_at ,
+         sv1.`data`.vendor_id AS vendor_id ,
+         sv1.`data`.assigned_address.id AS fsd_assigned_hub_id ,
+         sv1.`data`.current_address.id AS fsd_last_current_hub_id ,
+         sv1.`data`.current_address.type AS fsd_last_current_hub_type ,
+         sv1.`data`.billable_weight AS ekl_billable_weight ,
+         sv1.`data`.source_address.id AS source_address_id ,
+         sv1.`data`.source_address.pincode AS rvp_origin_geo_id ,
+         sv1.`data`.destination_address.id AS destination_address_id ,
+         sv1.`data`.shipment_items [0].seller_id AS seller_id ,
+         sv1.`data`.payment.payment_details [0].device_id AS pos_id ,
+         sv1.`data`.payment.payment_details [0].transaction_id AS transaction_id ,
+         sv1.`data`.payment.payment_details [0].agent_id AS agent_id ,
+         sv1.`data`.payment.amount_collected.value AS amount_collected ,
+         sv1.`data`.source_address.type AS source_address_type ,
+         sv1.`data`.destination_address.type AS seller_type ,
+         sv1.`data`.attributes AS sv_attribute ,
+         IF ( sv1.`data`.shipment_type = 'rvp' ,
+                                     sv1.`data`.source_address.pincode ,
+                                     sv1.`data`.destination_address.pincode ) AS location_pincode ,
+            IF ( sv1.`data`.shipment_type = 'rvp' ,
+                                        sv1.`data`.destination_address.pincode ,
+                                        sv1.`data`.source_address.pincode ) AS source_address_pincode,
+            IF ( sv1.`data`.shipment_type = 'rvp' ,
+                                        sv1.`data`.source_address.pincode ,
+                                        sv1.`data`.destination_address.pincode ) AS destination_address_pincode,
+		ekl_dim.postal_code as ekl_source_pincode
+ FROM bigfoot_snapshot.dart_wsr_scp_ekl_shipment_4_view_total sv1
+ LEFT OUTER JOIN bigfoot_external_neo.scp_ekl__ekl_hive_facility_dim ekl_dim ON sv1.`data`.source_address.id= ekl_dim.facility_id
+ WHERE ( sv1.`data`.source_address.id IN ( 563 ,
                                        564 ,
                                        565 ,
                                        566 ,
@@ -351,7 +361,7 @@ IF ( lower(sv.seller_id) = 'wsr' ,
                                        3621 ,
                                        3622 ,
                                        3623 )
-        OR `data`.destination_address.id IN ( 563 ,
+        OR sv1.`data`.destination_address.id IN ( 563 ,
                                               564 ,
                                               565 ,
                                               566 ,
@@ -369,12 +379,12 @@ IF ( lower(sv.seller_id) = 'wsr' ,
                                               3621 ,
                                               3622 ,
                                               3623 ) )
-   AND ( `data`.vendor_id IN ( 200 ,
+   AND ( sv1.`data`.vendor_id IN ( 200 ,
                                207 ,
                                242 )
-        OR `data`.vendor_id = '' )) sv
-   LEFT OUTER JOIN bigfoot_common.la_lzn_classification lzn ON ( sv.destination_address_pincode = lzn.destination_pincode
-                                                                AND sv.source_address_pincode = lzn.source_pincode )
+        OR sv1.`data`.vendor_id = '' )) sv
+   LEFT OUTER JOIN bigfoot_common.la_lzn_classification lzn1 ON ( sv.destination_address_pincode = lzn1.destination_pincode
+                                                                AND sv.ekl_source_pincode = lzn1.source_pincode AND lzn1.shipment_carrier = 'FSD' AND lzn1.tat = 'forward')
    LEFT OUTER JOIN
 ( SELECT DISTINCT refid AS shipment_id ,
                   `data`.merchant_id AS merchant_id ,
@@ -498,14 +508,22 @@ TRID ,
 	FROM bigfoot_journal.dart_wsr_scp_ekl_shipment_4 
                              GROUP BY entityid) sreh ON (sreh.entityid = sv.entityid)
    LEFT OUTER JOIN
-     (SELECT entityid ,
-             `data`.updated_at AS updated_at ,
-             `data`.current_address.id AS source_facility_id
-      FROM bigfoot_journal.dart_wsr_scp_ekl_shipment_4
-      WHERE `data`.STATUS = 'expected'
-        AND `data`.current_address.type = 'FKL_FACILITY'
+     (SELECT sf.entityid ,
+             sf.`data`.updated_at AS updated_at ,
+             sf.`data`.current_address.id AS source_facility_id,
+			 sf.`data`.destination_address.pincode AS destination_address_pincode,
+			 ekl_dim1.postal_code as ekl_source_pincode
+      FROM bigfoot_journal.dart_wsr_scp_ekl_shipment_4 sf
+	  LEFT OUTER JOIN bigfoot_external_neo.scp_ekl__ekl_hive_facility_dim ekl_dim1 ON sf.`data`.current_address.id= ekl_dim1.facility_id
+      WHERE sf.`data`.STATUS = 'expected'
+        AND sf.`data`.current_address.type = 'FKL_FACILITY'
         ) sourceFacility ON (sourceFacility.updated_at = sreh.received_at_source_facility
                                                 AND sourceFacility.entityid = sv.entityid)
+   LEFT OUTER JOIN bigfoot_common.la_lzn_classification lzn2 ON ( sourceFacility.destination_address_pincode = lzn2.destination_pincode
+                                                                  AND sourceFacility.ekl_source_pincode = lzn2.source_pincode AND lzn2.shipment_carrier = 'FSD' AND lzn2.tat = 'forward')
+   
+   
+   
    LEFT OUTER JOIN
      (SELECT entityId ,
              fsd_firstundeliverystatus
@@ -640,7 +658,7 @@ SELECT DISTINCT l1_fact.shipment_reference_ids AS shipment_id ,
 		NULL AS fsd_assigned_hub_id_key ,
 		NULL AS fsd_last_current_hub_id_key ,
 		NULL AS fsd_last_current_hub_type ,
-		NULL AS shipment_inscan_time ,
+		l1_fact.received_first_datetime AS shipment_inscan_time ,
 		l1_fact.rto_request_first_datetime AS shipment_rto_create_time ,
 		NULL AS fsd_last_received_time ,
 		NULL AS fsd_number_of_ofd_attempts ,
@@ -666,7 +684,7 @@ SELECT DISTINCT l1_fact.shipment_reference_ids AS shipment_id ,
 		NULL AS fsd_first_dh_received_datetime ,
 		NULL AS shipment_first_consignment_create_date_key ,
 		NULL AS shipment_first_consignment_create_time_key ,
-		dim.ekl_facility_hive_dim_key AS shipment_origin_facility_id_key ,
+		dim.ekl_hive_facility_dim_key AS shipment_origin_facility_id_key ,
 		l1_fact.undelivered_attempted_first_secondary_status AS fsd_firstundeliverystatus ,
 		l1_fact.rvp_pickup_completed_first_datetime AS rvp_pickup_complete_datetime ,
 		NULL AS shipment_rvp_pk_number_of_attempts ,
@@ -711,9 +729,11 @@ SELECT DISTINCT l1_fact.shipment_reference_ids AS shipment_id ,
 		NULL AS dummy1 ,
 		NULL AS dummy2 ,
 		NULL AS lzn_classification ,
-		l1_fact.vendor_name
+    NULL AS lzn_tat_target,
+		l1_fact.vendor_name,
+		rvp_completed_first_date_key as rvp_complete_date_key
 FROM bigfoot_external_neo.scp_fulfillment__fulfillment_tpl_shipment_intermediate_fact l1_fact
 LEFT JOIN bigfoot_external_neo.scp_fulfillment__fulfillment_liteshipmentstatusevent_base_fact l0_fact ON l0_fact.sr_id = l1_fact.sr_id 
-Left JOIN bigfoot_external_neo.scp_ekl__ekl_facility_hive_dim dim
+Left JOIN bigfoot_external_neo.scp_ekl__ekl_hive_facility_dim dim
 ON l1_fact.facility_name = dim.name
 WHERE UPPER(l1_fact.facility_name) like '%LAR%') FSD_TPL;
