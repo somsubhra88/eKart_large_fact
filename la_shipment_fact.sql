@@ -504,7 +504,7 @@ TRID ,
          min(`data`.value.value) AS shipment_value ,
          min(`data`.amount_to_collect.value) AS COD_amount_to_collect ,
          max(`data`.payment.payment_details.mode [0]) AS payment_mode ,
-         min(IF ( lower(`data`.STATUS) IN ('inscan_success') ,`data`.assigned_address.id ,NULL )) AS fsd_assigned_hub_id 
+         min(IF(lower(`data`.STATUS) IN ('InScan_Success','Received','Error','Undelivered_Not_Attended','PICKUP_AddedToPickupSheet','inscan_success') ,`data`.assigned_address.id ,NULL )) AS fsd_assigned_hub_id 
 	FROM bigfoot_journal.dart_wsr_scp_ekl_shipment_4 
                              GROUP BY entityid) sreh ON (sreh.entityid = sv.entityid)
    LEFT OUTER JOIN
@@ -552,7 +552,7 @@ TRID ,
    LEFT OUTER JOIN
      (SELECT DISTINCT `data`.group_id AS last_group_id ,
                       `data`.cutoff AS last_conn_cutoff_in_sec
-      FROM bigfoot_snapshot.dart_wsr_scp_ekl_connection_1_11_view_total) last_conn ON last_conn.last_group_id = sc.shipment_last_consignment_conn_id
+      FROM bigfoot_snapshot.dart_wsr_scp_ekl_connection_1_view_total) last_conn ON last_conn.last_group_id = sc.shipment_last_consignment_conn_id
    LEFT OUTER JOIN
      (SELECT tasklist_tracking_id ,
              ekl_facility_id ,
@@ -640,8 +640,8 @@ SELECT DISTINCT l1_fact.shipment_reference_ids AS shipment_id ,
         l1_fact.payment_type ,
         l1_fact.destination_pincode_key AS destination_geo_id_key ,
         (CASE
-             WHEN l1_fact.rto_flag = 1
-                  AND l1_fact.shipment_movement_type = 'Outgoing' THEN 'approved_rto'
+             WHEN (l1_fact.rto_flag = 1
+                  AND l1_fact.shipment_movement_type = 'Outgoing') OR rto_hack.sr_id IS NOT NULL THEN 'approved_rto'
              WHEN l1_fact.rto_flag = 0
                   AND l1_fact.shipment_movement_type = 'Outgoing' THEN 'forward'
              WHEN l1_fact.shipment_movement_type = 'Incoming' THEN 'rvp'
@@ -734,6 +734,10 @@ SELECT DISTINCT l1_fact.shipment_reference_ids AS shipment_id ,
 		rvp_completed_first_date_key as rvp_complete_date_key
 FROM bigfoot_external_neo.scp_fulfillment__fulfillment_tpl_shipment_intermediate_fact l1_fact
 LEFT JOIN bigfoot_external_neo.scp_fulfillment__fulfillment_liteshipmentstatusevent_base_fact l0_fact ON l0_fact.sr_id = l1_fact.sr_id 
+LEFT JOIN (Select `data`.associated_sr_id as sr_id
+ from bigfoot_journal.dart_fkint_scp_fulfillment_liteshipmentstatusevent_3
+ where `data`.remarks like '%RTO%' and `data`.status = 'created' group by `data`.associated_sr_id)rto_hack
+ ON rto_hack.sr_id = l1_fact.sr_id
 Left JOIN bigfoot_external_neo.scp_ekl__ekl_hive_facility_dim dim
 ON l1_fact.facility_name = dim.name
 WHERE UPPER(l1_fact.facility_name) like '%LAR%') FSD_TPL;
