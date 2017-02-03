@@ -1,4 +1,3 @@
---comment
 INSERT overwrite TABLE la_oms_fact
 SELECT DISTINCT order_item_unit_id,
                 order_item_id,
@@ -36,7 +35,9 @@ SELECT DISTINCT order_item_unit_id,
                 order_external_id,
                 call_verification_reason,
                 order_item_max_approved_time,
+                order_item_min_approved_time,
                 order_item_max_on_hold_time,
+                order_item_min_on_hold_time,
                 order_last_payment_method,
                 call_verification_type,
                 is_replacement,
@@ -62,7 +63,8 @@ SELECT DISTINCT order_item_unit_id,
                 order_pincode_key,
                 cu_sub_issue_type,
                 incident_creation_time,
-                cu_sub_sub_issue_type AS dummy
+                cu_sub_sub_issue_type AS dummy,
+        address_pincode
 FROM
   (SELECT oiu.order_item_unit_quantity,
           oiu.order_item_quantity,
@@ -102,15 +104,17 @@ FROM
           omso.order_bill_to_party_id AS account_id,
           cv.call_verification_type AS call_verification_type,
           cv.call_verification_reason AS call_verification_reason,
-          omsoi.order_item_max_approved_time,
-          omsoi.order_item_max_on_hold_time,
+          omsstat.order_item_max_approved_time,
+          omsoi.order_item_min_approved_time,
+          omsstat.order_item_max_on_hold_time,
+          omsoi.order_item_min_on_hold_time,
           (CASE WHEN oms_pay.order_last_payment_method = 'COD' THEN 'COD' ELSE 'Prepaid' END) AS order_last_payment_method,
           if(assoc.order_item_is_replacement>0,1,0) AS is_replacement,
           if(assoc.order_item_is_duplicate>0,1,0) AS is_duplicate,
           if(assoc.order_item_is_exchange>0,1,0) AS is_exchange,
           omso.order_shipping_address_id AS order_shipping_address_id,
-          cust_hub.calculated_delivery_hub,
-          cust_add.order_pincode_key,
+          cust_hub.hub_name as calculated_delivery_hub,
+          lookupkey('pincode',cp_user.address_pincode) AS order_pincode_key,
           lookup_date(omsoi.order_item_unit_delivered_datetime) AS order_item_unit_delivered_date_key,
           lookup_time(omsoi.order_item_unit_delivered_datetime) AS order_item_unit_delivered_time_key,
           cu.contact_date_key,
@@ -118,9 +122,10 @@ FROM
           cu.cu_issue_type,
           cu.cu_sub_issue_type,
           cu.cu_sub_sub_issue_type,
-          cu.incident_creation_time
+          cu.incident_creation_time,
+      cp_user.address_pincode
    FROM
-     (SELECT is_large,
+     (SELECT is_large,product_id,
              product_categorization_hive_dim_key
       FROM bigfoot_external_neo.sp_product__product_categorization_hive_dim
       WHERE is_large=1) prod
@@ -161,7 +166,7 @@ FROM
                                                                           order_item_units.order_item_unit_new_promised_date) AS order_item_unit_final_promised_date_use,
                    cast(cast(updatedat/1000 AS TIMESTAMP) AS STRING) AS order_item_last_update,
                    order_item_units.order_item_unit_new_promised_date AS order_item_unit_new_promised_date
-      FROM bigfoot_snapshot.dart_fkint_scp_oms_order_item_0_11_view_total LATERAL VIEW explode(`data`.order_item_unit) exploded_table AS order_item_units
+      FROM bigfoot_snapshot.dart_fkint_scp_oms_order_item_7_view_total LATERAL VIEW explode(`data`.order_item_unit) exploded_table AS order_item_units
       WHERE `data`.order_item_status NOT IN ('created')
         AND updatedat > ((UNIX_TIMESTAMP()-(86400*180))*1000)) oiu ON prod.product_categorization_hive_dim_key=oiu.order_item_product_id_key
    LEFT OUTER JOIN
@@ -169,7 +174,7 @@ FROM
              `data`.order_external_id AS order_external_id,
              `data`.order_bill_to_party_id AS order_bill_to_party_id,
              `data`.order_id AS order_id
-      FROM bigfoot_snapshot.dart_fkint_scp_oms_order_0_5_view_total
+      FROM bigfoot_snapshot.dart_fkint_scp_oms_order_4_view_total
       WHERE updatedat > ((UNIX_TIMESTAMP()-(86400*180))*1000)) omso ON (omso.order_id = oiu.order_id)
    LEFT OUTER JOIN
      (SELECT order_item_id,
@@ -191,12 +196,21 @@ FROM
       WHERE call_verif.row_desc = '1') cv ON (cv.order_item_id = oiu.order_item_id)
    LEFT OUTER JOIN
      (SELECT oi_units.order_item_unit_id AS omsoi_order_item_unit_id,
-             max(if(`data`.order_item_status = 'approved',from_utc_timestamp(updatedat,'GMT'),NULL)) AS order_item_max_approved_time,
-             max(if(`data`.order_item_status = 'on_hold',from_utc_timestamp(updatedat,'GMT'),NULL)) AS order_item_max_on_hold_time,
+             min(if(`data`.order_item_status = 'approved',from_utc_timestamp(updatedat,'GMT'),NULL)) AS order_item_min_approved_time,
+             min(if(`data`.order_item_status = 'on_hold',from_utc_timestamp(updatedat,'GMT'),NULL)) AS order_item_min_on_hold_time,
              min(if(oi_units.order_item_unit_status = 'delivered',oi_units.order_item_unit_updated_at,NULL)) AS order_item_unit_delivered_datetime
-      FROM bigfoot_journal.dart_fkint_scp_oms_order_item_0_11 LATERAL VIEW explode(`data`.order_item_unit) exploded_table AS oi_units
+      FROM bigfoot_journal.dart_fkint_scp_oms_order_item_7 LATERAL VIEW explode(`data`.order_item_unit) exploded_table AS oi_units
       WHERE DAY > #200#DAY#
       GROUP BY oi_units.order_item_unit_id) omsoi ON (oiu.order_item_unit_id = omsoi.omsoi_order_item_unit_id)
+    LEFT OUTER JOIN
+     (SELECT
+      `data`.order_item_status_order_item as order_item_id,
+      max(IF(`data`.order_item_status_to='on_hold' AND `data`.order_item_status_change_event='hold' AND `data`.order_item_status_change_reason IN ('blacklisted_customer', 'cod_verification', 'duplicate_order','fraud'),`data`.order_item_status_change_time,NULL)) as order_item_max_on_hold_time,
+      max(IF(`data`.order_item_status_to='approved' AND `data`.order_item_status_change_event='approve',`data`.order_item_status_change_time,NULL)) as order_item_max_approved_time
+      FROM bigfoot_journal.dart_fkint_scp_oms_order_item_status_change_1_0_view
+      GROUP BY `data`.order_item_status_order_item
+      ) omsstat
+     ON omsstat.order_item_id = oiu.order_item_id
    LEFT OUTER JOIN
      (SELECT `data`.order_item_assoc_to_order_item AS order_item_assoc_to_order_item,
              sum(if(`data`.Order_Item_Assoc_Type = 'replacement',1,0)) AS order_item_is_replacement,
@@ -381,19 +395,10 @@ FROM
              OR (`data`.status = "received"
                  AND `data`.payment_method<>"COD"
                  AND `data`.payment_method<>"POS"))) oms_pay ON oms_pay.order_external_id=omso.order_external_id
-   LEFT OUTER JOIN
-     (SELECT entityid AS cust_add_entity_id,
-             `data`.useraddress.pincode AS cust_add_pincode,
-             lookupkey('pincode',`data`.useraddress.pincode) AS order_pincode_key,
-             `data`.useraddress.addressid AS cust_add_id
-      FROM bigfoot_snapshot.dart_fkint_cp_user_contact_2_view_total
-      WHERE updatedat > ((UNIX_TIMESTAMP()-(86400*180))*1000)) cust_add ON omso.order_shipping_address_id=cust_add.cust_add_id
-   LEFT OUTER JOIN
-     (SELECT DISTINCT pincode AS customer_address_pincode,
-                      route AS customer_pincode_route,
-                      hub_name AS calculated_delivery_hub,
-                      hub_zone AS customer_pincode_hub_zone
-      FROM bigfoot_common.large_pincode_hub_mapping) cust_hub ON cust_hub.customer_address_pincode=cust_add.cust_add_pincode) FINAL
+   LEFT OUTER JOIN bigfoot_external_neo.cp_user__address_hive_dim cp_user
+   ON cp_user.address_id = omso.order_shipping_address_id
+   LEFT JOIN bigfoot_common.large_pincode_hub_mapping cust_hub
+   ON cust_hub.pincode = cp_user.address_pincode)FINAL
 WHERE order_item_unit_source_faciltiy IS NULL
   OR order_item_unit_source_faciltiy LIKE '%0_L'
   OR order_item_unit_source_faciltiy='c82e1fb314f34969';
