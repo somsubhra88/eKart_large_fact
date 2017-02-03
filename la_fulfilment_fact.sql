@@ -1,4 +1,3 @@
---Updated on 5th Nov, dummy values in slot_booking_Ref_id as fulfillment_entity has dups on fulfillment_unit_id level for booking ref
 insert overwrite table la_fulfilment_fact 
 select fiu.fulfill_item_unit_dispatch_actual_time,
 fiu.fulfill_item_unit_ship_actual_time,
@@ -42,7 +41,9 @@ fiu.fulfill_item_unit_size,
 fiu.fulfill_item_unit_reserved_status_b2b_actual_date_key,
 fiu.fulfill_item_unit_reserved_status_b2b_actual_time_key,
 fiu.fulfill_item_unit_reserved_status_b2b_actual_time,
-
+fiu.fulfill_item_unit_deliver_actual_time,
+fiu.fulfill_item_unit_deliver_actual_date_key,
+fiu.fulfill_item_unit_deliver_actual_time_key,
 if(fiu.fulfill_item_unit_is_for_slotted_delivery = 'NotSlotted',fiu_cpd.cpd_change_created_at,fiu_sc.slot_changed_created_at) as slot_changed_created_at,
 if(fiu_cpd.cpd_change_sub_reason is not null,'ekl',
 if(fiu.fulfill_item_unit_is_for_slotted_delivery = 'Slotted',
@@ -97,10 +98,13 @@ lookup_time(`data`.fulfill_item_unit_reserved_status.fulfill_item_unit_reserved_
 lookup_date(`data`.fulfill_item_unit_delivered_status.fulfill_item_unit_delivered_status_expected_time) as fulfill_item_unit_delivered_status_expected_date_key,
 lookup_time(`data`.fulfill_item_unit_delivered_status.fulfill_item_unit_delivered_status_expected_time) as fulfill_item_unit_delivered_status_expected_time_key,
 `data`.fulfill_item_unit_delivered_status.fulfill_item_unit_delivered_status_id as fulfill_item_unit_delivered_status_id,
- `data`.Fulfill_Item_Unit_Size as fulfill_item_unit_size,
+`data`.Fulfill_Item_Unit_Size as fulfill_item_unit_size,
 lookup_date(`data`.fulfill_item_unit_reserved_in_b2b_status.fulfill_item_unit_reserved_in_b2b_status_actual_time) as fulfill_item_unit_reserved_status_b2b_actual_date_key,
 lookup_time(`data`.fulfill_item_unit_reserved_in_b2b_status.fulfill_item_unit_reserved_in_b2b_status_actual_time) as fulfill_item_unit_reserved_status_b2b_actual_time_key,
-`data`.fulfill_item_unit_reserved_in_b2b_status.fulfill_item_unit_reserved_in_b2b_status_actual_time as fulfill_item_unit_reserved_status_b2b_actual_time
+`data`.fulfill_item_unit_reserved_in_b2b_status.fulfill_item_unit_reserved_in_b2b_status_actual_time as fulfill_item_unit_reserved_status_b2b_actual_time,
+`data`.fulfill_item_unit_delivered_status.fulfill_item_unit_delivered_status_actual_time AS fulfill_item_unit_deliver_actual_time,
+lookup_date(`data`.fulfill_item_unit_delivered_status.fulfill_item_unit_delivered_status_actual_time) as fulfill_item_unit_deliver_actual_date_key,
+lookup_time(`data`.fulfill_item_unit_delivered_status.fulfill_item_unit_delivered_status_actual_time) as fulfill_item_unit_deliver_actual_time_key
 from bigfoot_snapshot.dart_fkint_scp_fulfillment_fulfill_item_unit_2_view_total  A_22_1 where `data`.Fulfill_Item_Unit_Size in ('Large')) fiu
 left outer join 
 (select fiu_status_id,
@@ -129,7 +133,7 @@ from
 `data`.fulfill_item_unit_id,`data`.reason,`data`.created_at,`data`.new_date,
 LAST_VALUE(`data`.sub_reason) OVER (PARTITION BY `data`.fulfill_item_unit_id ORDER BY `data`.created_at rows between UNBOUNDED PRECEDING and UNBOUNDED FOLLOWING) AS sub_reason,
 row_number() OVER (PARTITION BY `data`.fulfill_item_unit_id ORDER BY `data`.created_at DESC rows between UNBOUNDED PRECEDING and UNBOUNDED FOLLOWING) as row_desc
-from bigfoot_journal.dart_fkint_scp_fulfillment_fulfill_item_unit_change_in_oms_customer_promised_date_1_0
+from bigfoot_journal.dart_fkint_scp_fulfillment_fulfill_item_unit_change_in_oms_customer_promised_date_1
 where `data`.sub_reason in ('update_sla','Dispatch_Breach','Dispatch_Delayed','Shipped_Promise_Change','Unhold','update_lpd','SELLER_RESCHEDULED','aggressive_assigning','item_not_found','reservation_failed','Do_Fulfill_Update','not_enough_inventory','reservation_failed') ) fiu_cpd_1
 where fiu_cpd_1.row_desc=1 ) fiu_cpd
 on fiu_cpd.fulfill_item_unit_id = fiu.fulfill_item_unit_id

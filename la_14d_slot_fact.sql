@@ -10,7 +10,9 @@ sl.slot_shipment_size as slot_shipment_size,
 sl.slot_duration as slot_duration,
 sr.slot_booking_id as slot_booking_id,
 sr.slot_reservation_status as slot_reservation_status,
-sr.vendor_tracking_id as vendor_tracking_id
+sr.vendor_tracking_id as vendor_tracking_id,
+lookup_date(sl.slot_start_date) as slot_start_date_key,
+lookupkey('facility_id', sl.slot_facility_id) as slot_facility_key
 from
 (select
 `data`.slot_id as slot_id,

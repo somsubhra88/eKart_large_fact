@@ -27,13 +27,11 @@ lookup_date(to_date(MD.fulfill_item_unit_dispatch_expected_time)) as dispatch_ex
 lookup_date(to_date(MD.fulfill_item_unit_dispatch_actual_time)) as dispatch_actual_date_key,
 lookup_date(to_date(MD.dispatch_max_time)) as dispatch_max_date_key,
 lookup_date(to_date(MD.shipment_first_consignment_create_datetime)) as consignment_create_date_key,
-unix_timestamp(dispatch_max_time)+9000+Time_diff as MH_promise_timestamp,
-from_unixtime(unix_timestamp(dispatch_max_time)+9000+Time_diff) as MH_promise_dateTime,
-if((unix_timestamp(dispatch_max_time)+9000+Time_diff)<unix_timestamp(shipment_first_consignment_create_datetime),1,0) as MH_breach_flag,
-lookup_date(to_date(from_unixtime(unix_timestamp(dispatch_max_time)+9000+Time_diff))) as MH_promise_date_key
+unix_timestamp(dispatch_max_time)+7200+Time_diff as MH_promise_timestamp,
+from_unixtime(unix_timestamp(dispatch_max_time)+7200+Time_diff) as MH_promise_dateTime,
+if((unix_timestamp(dispatch_max_time)+7200+Time_diff)<unix_timestamp(shipment_first_consignment_create_datetime),1,0) as MH_breach_flag,
+lookup_date(to_date(from_unixtime(unix_timestamp(dispatch_max_time)+7200+Time_diff))) as MH_promise_date_key
 
-
- 
 from
 (SELECT
 M.vendor_tracking_id,
@@ -105,12 +103,12 @@ A.TPT_intransit_breach_flag as TPT_intransit_breach_flag,
 A.shipment_tpt_dh_eta_datetime as shipment_tpt_dh_eta_datetime,
 A.shipment_tpt_dh_eta_date_key as shipment_tpt_dh_eta_date_key,
 if(unix_timestamp(A.fulfill_item_unit_dispatch_actual_time)>=unix_timestamp(A.fulfill_item_unit_dispatch_expected_time),
-if(A.D_act_sec+9000<86400,A.D_act_sec+9000,A.D_act_sec-77400),
-if(A.D_exp_sec+9000<86400,A.D_exp_sec+9000,A.D_exp_sec-77400)
+if(A.D_act_sec+7200<86400,A.D_act_sec+7200,A.D_act_sec-77400),
+if(A.D_exp_sec+7200<86400,A.D_exp_sec+7200,A.D_exp_sec-77400)
 ) as MH_ready_time,
 if(unix_timestamp(A.fulfill_item_unit_dispatch_actual_time)>=unix_timestamp(A.fulfill_item_unit_dispatch_expected_time),
-if(A.D_act_sec+9000<86400,0,1),
-if(A.D_exp_sec+9000<86400,0,1)
+if(A.D_act_sec+7200<86400,0,1),
+if(A.D_exp_sec+7200<86400,0,1)
 ) as next_day_flag,
 A.fulfill_item_unit_dispatch_expected_time as fulfill_item_unit_dispatch_expected_time,
 A.fulfill_item_unit_dispatch_actual_time as fulfill_item_unit_dispatch_actual_time,
@@ -167,7 +165,7 @@ from_unixtime(unix_timestamp(concat(shipment_first_consignment_create_date_key, 
 shipment_first_consignment_id,
 shipment_last_consignment_id
 from 
-bigfoot_external_neo.scp_ekl__la_shipment_fact where shipment_carrier = 'FSD') Sh
+bigfoot_external_neo.scp_ekl__la_shipment_l0_fact where shipment_carrier = 'FSD') Sh
 on 
 ff.shipment_merchant_reference_id = Sh.merchant_reference_id
 Left join
@@ -178,14 +176,14 @@ unix_timestamp(`data`.created_at) as first_time,
 `data`.connection_actual_tat as eta_in_sec,
 `data`.connection_id as Conn_id
 FROM 
-bigfoot_snapshot.dart_wsr_scp_ekl_shipmentgroup_1_13_view_total where `data`.type = 'consignment')ConsiTr
+bigfoot_snapshot.dart_wsr_scp_ekl_shipmentgroup_3_view_total where `data`.type = 'consignment')ConsiTr
 on
 Sh.shipment_last_consignment_id = ConsiTr.consignment_id
 Left join
 (Select 
  cast(split(entityid, "-")[1] AS INT) as Consignment_id,
  `data`.connection_id as first_conn
- from bigfoot_snapshot.dart_wsr_scp_ekl_shipmentgroup_1_13_view_total) ConsiA
+ from bigfoot_snapshot.dart_wsr_scp_ekl_shipmentgroup_3_view_total) ConsiA
 on Sh.shipment_first_consignment_id = ConsiA.Consignment_id) A
  
 Left join 

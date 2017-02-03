@@ -40,14 +40,14 @@ FROM
     if(isnull(Sh.shipment_last_consignment_conn_id) AND not(isnull(Sh.shipment_last_consignment_id)) ,1,0) AS tpt_compliance_flag,
     unix_timestamp(Sh.shipment_last_consignment_eta_datetime) - unix_timestamp(Sh.shipment_first_consignment_create_datetime) AS Conn_eta_in_sec,
 		CASE 
-		  WHEN ff.fulfill_item_unit_is_for_slotted_delivery='NotSlotted' THEN concat(substr(ff.fulfill_item_unit_delivered_status_expected_date_key,1,4),'-',substr(ff.fulfill_item_unit_delivered_status_expected_date_key,5,2),'-',substr(ff.fulfill_item_unit_delivered_status_expected_date_key,7,2),' 06:00:00')
+		  WHEN ff.fulfill_item_unit_is_for_slotted_delivery='NotSlotted' THEN to_utc_timestamp(concat(substr(ff.fulfill_item_unit_delivered_status_expected_date_key,1,4),'-',substr(ff.fulfill_item_unit_delivered_status_expected_date_key,5,2),'-',substr(ff.fulfill_item_unit_delivered_status_expected_date_key,7,2),' 06:00:00'),'')
 		  WHEN ff.fulfill_item_unit_is_for_slotted_delivery='Slotted' 
   		  THEN 
-  		  from_unixtime(IF(unix_timestamp(Sh.shipment_last_consignment_eta_datetime) >=
+  		  to_utc_timestamp(from_unixtime(IF(unix_timestamp(Sh.shipment_last_consignment_eta_datetime) >=
   		  unix_timestamp(ff.dispatch_max_time) + 7200 + unix_timestamp(Sh.shipment_last_consignment_eta_datetime) - unix_timestamp(Sh.shipment_first_consignment_create_datetime),
   		  unix_timestamp(Sh.shipment_last_consignment_eta_datetime),
   		  unix_timestamp(ff.dispatch_max_time) + 7200 + unix_timestamp(Sh.shipment_last_consignment_eta_datetime) - unix_timestamp(Sh.shipment_first_consignment_create_datetime)
-  		  ))
+  		  )),'')
 		END AS shipment_tpt_dh_eta_datetime,
 		Sh.shipment_last_consignment_create_datetime AS Actual_cons_created_at,
     ff.fulfill_item_unit_dispatch_expected_time AS fulfill_item_unit_dispatch_expected_time,
@@ -91,7 +91,7 @@ FROM
         shipment_last_consignment_eta_datetime,
         ekl_shipment_type
       FROM 
-        bigfoot_external_neo.scp_ekl__la_shipment_fact
+        bigfoot_external_neo.scp_ekl__la_shipment_l0_fact
       WHERE 
         shipment_last_consignment_id IS NOT NULL
     ) Sh 
@@ -106,7 +106,7 @@ FROM
         bigfoot_external_neo.scp_ekl__ekl_facility_hive_dim
     ) Origin 
     ON 
-      Sh.shipment_origin_facility_id_key = Origin.ekl_facility_hive_dim_key
+      Sh.shipment_origin_facility_id_key = NVL(Origin.ekl_facility_hive_dim_key, 0)
     LEFT JOIN
     (
       SELECT 
@@ -116,7 +116,7 @@ FROM
         bigfoot_external_neo.scp_ekl__ekl_facility_hive_dim
     ) Dest 
     ON 
-      Sh.fsd_assigned_hub_id_key = Dest.dest_fid_dim_key
+      Sh.fsd_assigned_hub_id_key = NVL(Dest.dest_fid_dim_key, 0)
     LEFT JOIN
     (
       SELECT 
@@ -129,6 +129,4 @@ FROM
       B.fkl_facility_id = Origin.origin_facility_id
     WHERE 
       not(isnull(Sh.vendor_tracking_id))
-      AND not(isnull(Dest.dest_facility_id))
-      AND not(isnull(Origin.origin_facility_id))
 ) A;

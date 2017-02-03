@@ -75,23 +75,22 @@ LEFT OUTER JOIN
                                                                        order_item_units.order_item_unit_new_promised_date) AS order_item_unit_final_promised_date_use,
                 updatedat AS order_item_last_update,
                 order_item_units.order_item_unit_new_promised_date AS order_item_unit_new_promised_date
-   FROM bigfoot_journal.dart_fkint_scp_oms_order_item_0_11_view_14d LATERAL VIEW explode(`data`.order_item_unit) exploded_table AS order_item_units
-   WHERE `data`.order_item_status NOT IN ('created')) oiu ON prod.product_categorization_hive_dim_key=oiu.order_item_product_id_key
-LEFT OUTER JOIN bigfoot_journal.dart_fkint_scp_oms_order_0_5_view_14d omso ON (omso.`data`.order_id = oiu.order_id)
-LEFT OUTER JOIN
-  (SELECT `data`.order_item_id AS omsoi_order_item_id,
-          max(if(`data`.order_item_status = 'approved',from_utc_timestamp(updatedat,'GMT'),NULL)) AS order_item_max_approved_time,
-          max(if(`data`.order_item_status = 'on_hold',from_utc_timestamp(updatedat,'GMT'),NULL)) AS order_item_max_on_hold_time
-   FROM bigfoot_journal.dart_fkint_scp_oms_order_item_0_11_14d
-   GROUP BY `data`.order_item_id) omsoi ON oiu.order_item_id = omsoi.omsoi_order_item_id
-
+   FROM bigfoot_journal.dart_fkint_scp_oms_order_item_7_view_14d LATERAL VIEW explode(`data`.order_item_unit) exploded_table AS order_item_units
+   WHERE `data`.order_item_status NOT IN ('created') and UPPER(`data`.order_item_service_profile)='FBF') oiu ON prod.product_categorization_hive_dim_key=oiu.order_item_product_id_key  
+LEFT OUTER JOIN bigfoot_journal.dart_fkint_scp_oms_order_4_view_14d omso ON (omso.`data`.order_id = oiu.order_id)
+LEFT OUTER JOIN   
+   (SELECT oi_units.order_item_unit_id AS omsoi_order_item_unit_id,
+             max(if(`data`.order_item_status = 'approved',from_utc_timestamp(updatedat,'GMT'),NULL)) AS order_item_max_approved_time,
+             max(if(`data`.order_item_status = 'on_hold',from_utc_timestamp(updatedat,'GMT'),NULL)) AS order_item_max_on_hold_time
+      FROM bigfoot_journal.dart_fkint_scp_oms_order_item_7_view_14d LATERAL VIEW explode(`data`.order_item_unit) exploded_table AS oi_units
+      GROUP BY oi_units.order_item_unit_id) omsoi ON (oiu.order_item_unit_id = omsoi.omsoi_order_item_unit_id)
 LEFT OUTER JOIN
 (SELECT `data`.order_id AS order_id,
        `data`.order_original_billing_amount_in_paisa/100 AS order_original_billing_amount
-FROM bigfoot_snapshot.dart_fkint_scp_oms_order_0_5_view_total) omsorder on omsorder.order_id = oiu.order_id
+FROM bigfoot_snapshot.dart_fkint_scp_oms_order_4_view_total) omsorder on omsorder.order_id = oiu.order_id
 
 LEFT OUTER JOIN
 (SELECT order_item_units.order_item_unit_id AS order_item_unit_id ,
        aggregate_filter('SUM', `data`.order_item_adjustment, 'order_item_adjustment_amount_in_paisa', 'order_item_adjustment_type', 'EQ', 'PROMOTION_DISCOUNT') / 100 AS order_item_promotion_discount
-FROM bigfoot_snapshot.dart_fkint_scp_oms_order_item_0_11_view LATERAL VIEW explode(`data`.order_item_unit) exploded_table AS order_item_units) omsdis
+FROM bigfoot_snapshot.dart_fkint_scp_oms_order_item_7_view_total LATERAL VIEW explode(`data`.order_item_unit) exploded_table AS order_item_units) omsdis
 ON omsdis.order_item_unit_id = oiu.order_item_unit_id;

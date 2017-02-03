@@ -207,7 +207,7 @@ FROM
            IF ( sv.vendor_id = '' ,
                                'VNF' ,
                                'FSD' ) AS shipment_carrier ,
-              lookupkey('facility_id', IF ( NOT isnull(sv.fsd_assigned_hub_id) ,sv.fsd_assigned_hub_id ,sreh.fsd_assigned_hub_id )) AS fsd_assigned_hub_id_key ,
+              lookupkey('facility_id', IF ( NOT(isnull(sv.fsd_assigned_hub_id)) ,sv.fsd_assigned_hub_id ,sreh.intermediate_fsd_assigned_hub_id.col2)) AS fsd_assigned_hub_id_key ,
               lookupkey('facility_id', sv.fsd_last_current_hub_id) AS fsd_last_current_hub_id_key ,
               sv.fsd_last_current_hub_type AS fsd_last_current_hub_type ,
               sv.ekl_billable_weight AS ekl_billable_weight ,
@@ -504,7 +504,7 @@ TRID ,
          min(`data`.value.value) AS shipment_value ,
          min(`data`.amount_to_collect.value) AS COD_amount_to_collect ,
          max(`data`.payment.payment_details.mode [0]) AS payment_mode ,
-         min(IF(lower(`data`.STATUS) IN ('InScan_Success','Received','Error','Undelivered_Not_Attended','PICKUP_AddedToPickupSheet','inscan_success') ,`data`.assigned_address.id ,NULL )) AS fsd_assigned_hub_id 
+		 min(if(lower(`data`.status) IN ('inscan_success','received','error','undelivered_not_attended','pickup_addedtopickupsheet'),struct(updatedat,struct(`data`.current_address.id ,`data`.assigned_address.id)),null)).col2 as intermediate_fsd_assigned_hub_id 	
 	FROM bigfoot_journal.dart_wsr_scp_ekl_shipment_4 
                              GROUP BY entityid) sreh ON (sreh.entityid = sv.entityid)
    LEFT OUTER JOIN
@@ -674,7 +674,7 @@ SELECT DISTINCT l1_fact.shipment_reference_ids AS shipment_id ,
 		NULL AS shipment_last_ofd_datetime ,
 		l1_fact.dispatched_to_facility_first_date_key AS vendor_dispatch_datetime ,
 		l1_fact.volumetric_weight AS ekl_billable_weight ,
-		l1_fact.out_for_delivery_first_datetime AS tpl_first_ofd_time ,
+		IF(l1_fact.out_for_delivery_first_datetime < l1_fact.undelivered_attempted_first_datetime,l1_fact.out_for_delivery_first_datetime,l1_fact.undelivered_attempted_first_datetime) AS tpl_first_ofd_time ,
 		l0_fact.out_for_delivery_last_datetime AS tpl_last_ofd_time ,
 		NULL AS fsd_assigned_hub_sent_datetime ,
 		NULL AS shipment_first_consignment_id ,
@@ -688,7 +688,7 @@ SELECT DISTINCT l1_fact.shipment_reference_ids AS shipment_id ,
 		l1_fact.undelivered_attempted_first_secondary_status AS fsd_firstundeliverystatus ,
 		l1_fact.rvp_pickup_completed_first_datetime AS rvp_pickup_complete_datetime ,
 		NULL AS shipment_rvp_pk_number_of_attempts ,
-		NULL AS end_state_datetime ,
+		l1_fact.rto_completed_first_datetime AS end_state_datetime ,
 		NULL AS fsd_last_dhhub_sent_datetime ,
 		NULL AS rvp_hub_id ,
 		NULL AS rvp_hub_id_key ,
@@ -699,7 +699,7 @@ SELECT DISTINCT l1_fact.shipment_reference_ids AS shipment_id ,
 		NULL AS runsheet_close_datetime ,
 		NULL AS runsheet_close_date_key ,
 		l1_fact.created_at AS shipment_created_at_datetime ,
-		NULL AS shipment_last_consignment_create_datetime ,
+		l1_fact.dispatched_to_vendor_first_datetime AS shipment_last_consignment_create_datetime,
 		NULL AS shipment_last_consignment_eta_in_sec ,
 		NULL AS shipment_last_consignment_eta_datetime ,
 		NULL AS shipment_last_consignment_conn_id ,
@@ -729,15 +729,26 @@ SELECT DISTINCT l1_fact.shipment_reference_ids AS shipment_id ,
 		NULL AS dummy1 ,
 		NULL AS dummy2 ,
 		NULL AS lzn_classification ,
-    NULL AS lzn_tat_target,
+		NULL AS lzn_tat_target,
 		l1_fact.vendor_name,
-		rvp_completed_first_date_key as rvp_complete_date_key
+		IF (lookup_date(to_date(cast(rvp_complete_status.rvp_completed_first_datetime as string))) = 0 OR lookup_date(to_date(cast(rvp_complete_status.rvp_completed_first_datetime as string))) IS NULL,rvp_completed_first_date_key,lookup_date(to_date(cast(rvp_complete_status.rvp_completed_first_datetime as string))) ) as rvp_complete_date_key
 FROM bigfoot_external_neo.scp_fulfillment__fulfillment_tpl_shipment_intermediate_fact l1_fact
 LEFT JOIN bigfoot_external_neo.scp_fulfillment__fulfillment_liteshipmentstatusevent_base_fact l0_fact ON l0_fact.sr_id = l1_fact.sr_id 
 LEFT JOIN (Select `data`.associated_sr_id as sr_id
  from bigfoot_journal.dart_fkint_scp_fulfillment_liteshipmentstatusevent_3
  where `data`.remarks like '%RTO%' and `data`.status = 'created' group by `data`.associated_sr_id)rto_hack
  ON rto_hack.sr_id = l1_fact.sr_id
+ LEFT JOIN (Select `data`.associated_sr_id as sr_id, min (`data`.status_date_time) as rvp_completed_first_datetime
+ from bigfoot_journal.dart_fkint_scp_fulfillment_liteshipmentstatusevent_3
+ where `data`.status IN ('dispatched_to_facility',
+						'dispatched_to_merchant',
+						'received',
+						'rvp_completed',
+						'rvp_handover_completed',
+						'rvp_handover_initiated',
+						'received_by_merchant') 
+ group by `data`.associated_sr_id, `data`.shipment_reference_ids)rvp_complete_status
+ ON rvp_complete_status.sr_id = l1_fact.sr_id
 Left JOIN bigfoot_external_neo.scp_ekl__ekl_hive_facility_dim dim
 ON l1_fact.facility_name = dim.name
 WHERE UPPER(l1_fact.facility_name) like '%LAR%') FSD_TPL;

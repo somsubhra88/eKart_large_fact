@@ -1,4 +1,3 @@
--- Comments
 Insert overwrite table la_14d_shipment_fact
 select distinct
 sv.shipment_id,
@@ -45,7 +44,9 @@ sreh.end_state_datetime,
 sc.shipment_first_consignment_conn_id,
 sc.shipment_last_consignment_conn_id,
 sc.shipment_first_consignment_eta_in_sec,
-sc.shipment_last_consignment_eta_in_sec
+sc.shipment_last_consignment_eta_in_sec,
+sc.shipment_last_consignment_eta_datetime,
+sreh.shipment_rto_create_time
 from 
 ( Select is_large,product_categorization_hive_dim_key  
 from bigfoot_external_neo.sp_product__product_categorization_hive_dim where is_large=1) prod
@@ -87,6 +88,7 @@ shipment_first_consignment_conn_id,
 shipment_last_consignment_conn_id,
 shipment_first_consignment_eta_in_sec,
 shipment_last_consignment_eta_in_sec,
+shipment_last_consignment_eta_datetime,
 C.tracking_id as vendor_tracking_id
 From
 (Select 
@@ -99,6 +101,7 @@ B.shipment_last_consignment_id,
 B.shipment_last_consignment_create_datetime,
 B.shipment_last_consignment_conn_id,
 B.shipment_last_consignment_eta_in_sec,
+B.shipment_last_consignment_eta_datetime,
 B.l_row_n,
 B.tracking_id from
 (Select 
@@ -111,6 +114,7 @@ first_value(A.consignment_id) Over (PARTITION By A.tracking_id order by A.first_
 first_value(A.first_time) Over (PARTITION By A.tracking_id order by A.first_time DESC rows between UNBOUNDED PRECEDING and UNBOUNDED FOLLOWING) as shipment_last_consignment_create_datetime,
 first_value(A.Conn_id) Over (PARTITION By A.tracking_id order by A.first_time DESC rows between UNBOUNDED PRECEDING and UNBOUNDED FOLLOWING) as shipment_last_consignment_conn_id,
 first_value(A.eta_in_sec) Over (PARTITION By A.tracking_id order by A.first_time DESC rows between UNBOUNDED PRECEDING and UNBOUNDED FOLLOWING) as shipment_last_consignment_eta_in_sec,
+first_value(A.eta_datatime) Over (PARTITION By A.tracking_id order by A.first_time DESC rows between UNBOUNDED PRECEDING and UNBOUNDED FOLLOWING) as shipment_last_consignment_eta_datetime,
 row_number() Over (PARTITION By A.tracking_id order by A.first_time DESC rows between UNBOUNDED PRECEDING and UNBOUNDED FOLLOWING) as l_row_n,
 tracking_id
 From
@@ -120,9 +124,10 @@ cast(split(entityid, "-")[1] AS INT) as consignment_id,
 TRID as tracking_id,
 `data`.connection_id as Conn_id,
 min(`data`.connection_estimated_tat) as eta_in_sec,
+min(`data`.eta) as eta_datatime,
 min(unix_timestamp(`data`.created_at)) as first_time
 FROM 
-bigfoot_journal.dart_wsr_scp_ekl_shipmentgroup_1_13_view_14d lateral view explode(`data`.shipments) exploded_table as TRID where `data`.type = 'consignment' group by entityid, TRID,`data`.connection_id) A )B
+bigfoot_journal.dart_wsr_scp_ekl_shipmentgroup_3_view_14d lateral view explode(`data`.shipments) exploded_table as TRID where `data`.type = 'consignment' group by entityid, TRID,`data`.connection_id) A )B
 where B.row_n=1 )C )sc
 on sv.vendor_tracking_id=sc.vendor_tracking_id
 left outer join

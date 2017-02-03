@@ -1,6 +1,165 @@
 insert overwrite table la_14d_e2e_fact
 select
-order_item_unit_quantity, order_item_quantity, order_item_selling_price, order_item_type, order_item_title, order_item_unit_status, order_item_unit_is_promised_date_updated, order_item_sub_type, order_id, order_item_id, order_item_unit_tracking_id, order_item_sku, order_item_category_id, order_item_sub_status, order_item_ship_group_id, order_item_status, order_item_unit_shipment_id, order_item_unit_id, order_item_unit_init_promised_datetime, order_item_product_id, order_item_product_id_key, order_item_unit_seller_id, order_item_unit_source_facility, order_item_listing_id, order_item_date, order_item_date_key, order_item_created_at, order_item_unit_final_promised_date_use, order_item_unit_final_promised_date_key, order_item_last_update, order_item_unit_new_promised_date, order_shipping_address_id, order_shipping_address_id_key, order_external_id, account_id, order_item_max_approved_time, order_item_max_on_hold_time, tracking_id_type, customer_promise_proactive_age, fulfill_item_unit_dispatch_actual_datetime, fulfill_item_unit_dispatch_actual_date_key, fulfill_item_unit_ship_actual_time, fulfill_item_unit_dispatch_expected_datetime, fulfill_item_unit_dispatch_expected_date_key, fulfill_item_unit_ship_expected_time, fulfillment_order_item_id, fulfill_item_unit_id, fulfill_item_unit_status, shipment_merchant_reference_id, fulfill_item_unit_updated_at, fulfill_item_unit_region, fulfill_item_unit_region_type, fulfill_item_id, fulfill_item_type, fulfill_item_unit_deliver_after_time, fulfill_item_unit_dispatch_after_time, fulfill_item_unit_is_for_slotted_delivery, fulfill_item_unit_reserved_status_b2c_actual_time, fulfill_item_unit_reserved_status_expected_time, fulfill_item_unit_delivered_status_expected_time, fulfill_item_unit_delivered_status_id, fulfill_item_unit_size, fulfill_item_unit_reserved_status_b2b_actual_time, slot_changed_created_at, slot_changed_by, slot_booking_ref_id, customer_destination_pincode, fc_breach_flag, fc_pending_flag, fc_pending_age, shipment_id, vendor_tracking_id, shipment_current_status, shipment_current_status_datetime, payment_type, destination_pincode, ekl_shipment_type, customer_promise_datetime, logistics_promise_datetime, shipment_created_at_datetime, shipment_created_at_date_key, vendor_id, vendor_id_key, shipment_carrier, fsd_assigned_hub_id, fsd_assigned_hub_id_key, fsd_last_current_hub_id, fsd_last_current_hub_id_key, fsd_last_current_hub_type, ekl_billable_weight, merchant_reference_id, shipment_first_consignment_id, shipment_last_consignment_id, shipment_inscan_time, fsd_last_received_time, fsd_number_of_ofd_attempts, fsd_assignedhub_expected_time, fsd_assignedhub_received_time, ekl_delivery_datetime, ekl_delivery_date_key, shipment_first_ofd_datetime, shipment_last_ofd_datetime, vendor_dispatch_datetime, tpl_first_ofd_time, tpl_last_ofd_time, fsd_assigned_hub_sent_datetime, openbox_reject_datetime, merchant_id, fsd_first_dh_received_datetime, shipment_value, runsheet_close_datetime, COD_amount_to_collect, shipment_first_consignment_create_datetime, shipment_last_consignment_create_datetime, shipment_origin_facility_id, end_state_datetime, shipment_first_consignment_conn_id, shipment_last_consignment_conn_id, shipment_first_consignment_eta_in_sec, shipment_last_consignment_eta_in_sec, fsd_current_customer_dependency_flag, shipment_dh_pending_flag, ekl_pending_flag, openbox_reject_flag, shipment_dh_days_for_delivery, first_attempt_delivery_flag, slot_id, slot_code, slot_facility_id, slot_facility_id_key, slot_start_date, slot_start_date_key, slot_end_date, slot_actual_capacity, slot_shipment_size, slot_duration, slot_booking_id, slot_reservation_status, product_categorization_hive_dim_key, order_item_product_title, analytic_super_category, order_item_brand, analytic_vertical, analytic_category, slot_facility_name, slot_facility_zone, slot_facility_type, fsd_last_current_hub_name, fsd_assigned_hub_name, fsd_assigned_hub_zone, fsd_assigned_hub_type, shipment_vendor_name, present_day, present_time, fc_breach_bucket, shipment_dh_fwd_promised_date, shipment_pending_location, shipment_breach_flag, pending_beyond_customer_promise_age, asset,
+order_item_unit_quantity, 
+order_item_quantity, 
+order_item_selling_price, 
+order_item_type, 
+order_item_title, 
+order_item_unit_status, 
+order_item_unit_is_promised_date_updated, 
+order_item_sub_type, 
+order_id, 
+order_item_id, 
+order_item_unit_tracking_id, 
+order_item_sku, 
+order_item_category_id, 
+order_item_sub_status, 
+order_item_ship_group_id, 
+order_item_status, 
+order_item_unit_shipment_id, 
+order_item_unit_id, 
+order_item_unit_init_promised_datetime, 
+order_item_product_id, 
+order_item_product_id_key, 
+order_item_unit_seller_id, 
+order_item_unit_source_facility, 
+order_item_listing_id, 
+order_item_date, 
+order_item_date_key, 
+order_item_created_at, 
+order_item_unit_final_promised_date_use, 
+order_item_unit_final_promised_date_key, 
+order_item_last_update, 
+order_item_unit_new_promised_date, 
+order_shipping_address_id, 
+order_shipping_address_id_key, 
+order_external_id, 
+account_id, 
+order_item_max_approved_time, 
+order_item_max_on_hold_time, 
+tracking_id_type, 
+customer_promise_proactive_age, 
+fulfill_item_unit_dispatch_actual_datetime, 
+fulfill_item_unit_dispatch_actual_date_key, 
+fulfill_item_unit_ship_actual_time, 
+fulfill_item_unit_dispatch_expected_datetime, 
+fulfill_item_unit_dispatch_expected_date_key, 
+fulfill_item_unit_ship_expected_time, 
+fulfillment_order_item_id, 
+fulfill_item_unit_id, 
+fulfill_item_unit_status, 
+shipment_merchant_reference_id, 
+fulfill_item_unit_updated_at, 
+fulfill_item_unit_region, 
+fulfill_item_unit_region_type, 
+fulfill_item_id, 
+fulfill_item_type, 
+fulfill_item_unit_deliver_after_time, 
+fulfill_item_unit_dispatch_after_time, 
+fulfill_item_unit_is_for_slotted_delivery, 
+fulfill_item_unit_reserved_status_b2c_actual_time, 
+fulfill_item_unit_reserved_status_expected_time, 
+fulfill_item_unit_delivered_status_expected_time, 
+fulfill_item_unit_delivered_status_id, 
+fulfill_item_unit_size, 
+fulfill_item_unit_reserved_status_b2b_actual_time, 
+slot_changed_created_at, 
+slot_changed_by, 
+slot_booking_ref_id, 
+customer_destination_pincode, 
+fc_breach_flag, 
+fc_pending_flag, 
+fc_pending_age, 
+shipment_id, 
+vendor_tracking_id, 
+shipment_current_status, 
+shipment_current_status_datetime, 
+payment_type, 
+destination_pincode, 
+ekl_shipment_type, 
+customer_promise_datetime, 
+logistics_promise_datetime, 
+shipment_created_at_datetime, 
+shipment_created_at_date_key, 
+vendor_id, 
+vendor_id_key, 
+shipment_carrier, 
+fsd_assigned_hub_id,
+fsd_assigned_hub_id_key, 
+fsd_last_current_hub_id, 
+fsd_last_current_hub_id_key, 
+fsd_last_current_hub_type, 
+ekl_billable_weight, 
+merchant_reference_id, 
+shipment_first_consignment_id, 
+shipment_last_consignment_id, 
+shipment_inscan_time, 
+fsd_last_received_time, 
+fsd_number_of_ofd_attempts, 
+fsd_assignedhub_expected_time, 
+fsd_assignedhub_received_time, 
+ekl_delivery_datetime, 
+ekl_delivery_date_key, 
+shipment_first_ofd_datetime, 
+shipment_last_ofd_datetime, 
+vendor_dispatch_datetime, 
+tpl_first_ofd_time, 
+tpl_last_ofd_time, 
+fsd_assigned_hub_sent_datetime, 
+openbox_reject_datetime, 
+merchant_id, 
+fsd_first_dh_received_datetime, 
+shipment_value, 
+runsheet_close_datetime, 
+COD_amount_to_collect, 
+shipment_first_consignment_create_datetime, 
+shipment_last_consignment_create_datetime, 
+shipment_origin_facility_id, 
+end_state_datetime, 
+shipment_first_consignment_conn_id, 
+shipment_last_consignment_conn_id, 
+shipment_first_consignment_eta_in_sec, 
+shipment_last_consignment_eta_in_sec, 
+fsd_current_customer_dependency_flag, 
+shipment_dh_pending_flag, 
+ekl_pending_flag, 
+openbox_reject_flag, 
+shipment_dh_days_for_delivery, 
+first_attempt_delivery_flag, 
+slot_id, 
+slot_code, 
+slot_facility_id, 
+slot_facility_id_key, 
+slot_start_date, 
+slot_start_date_key, 
+slot_end_date, 
+slot_actual_capacity, 
+slot_shipment_size, 
+slot_duration, 
+slot_booking_id, 
+slot_reservation_status, 
+product_categorization_hive_dim_key, 
+order_item_product_title, 
+analytic_super_category, 
+order_item_brand, 
+analytic_vertical, 
+analytic_category, 
+slot_facility_name, 
+slot_facility_zone, 
+slot_facility_type, 
+fsd_last_current_hub_name, 
+fsd_assigned_hub_name, 
+fsd_assigned_hub_zone, 
+fsd_assigned_hub_type, 
+shipment_vendor_name, 
+present_day, 
+present_time, 
+fc_breach_bucket, 
+shipment_dh_fwd_promised_date, 
+shipment_pending_location, 
+shipment_breach_flag, 
+pending_beyond_customer_promise_age, 
+asset,
 (CASE
 WHEN asset in ('12_Returned','11_Delivered','13_Cancelled')
 THEN 0
@@ -41,13 +200,60 @@ is_exchange,
 order_payment_type,
 onhold_reason,
 onhold_sub_reason,
-'null' as dummy1,
-'null' as dummy2
+if(fulfill_item_unit_region like '%0_L','1','0') as dummy1,
+NULL as dummy2,
+customer_dependency_flag,
+IF(
+	from_unixtime(unix_timestamp(),'yyyy-MM-dd') <= to_date(order_item_unit_final_promised_date_use),'10_Future Shipments',
+		IF(
+			NOT(isnull(shipment_rto_create_time)) and to_date(shipment_rto_create_time) <= to_date(order_item_unit_final_promised_date_use), '09_RTO_Before_CPD',
+				IF(
+					NOT(isnull(ekl_delivery_datetime)) and to_date(ekl_delivery_datetime) <= to_date(order_item_unit_final_promised_date_use),'09_Delivered_by_Promise',
+						IF(
+							NOT(isnull(shipment_first_ofd_datetime)) and to_date(shipment_first_ofd_datetime) <= to_date(order_item_unit_final_promised_date_use) and customer_dependency_flag=1,'08_Customer_Dependency_OFD_On_Promise',
+								IF(
+									to_date(logistics_promise_datetime)>to_date(order_item_unit_final_promised_date_use),'07_LPD>CPD - Tech_Issue',
+										IF(
+											from_unixtime(unix_timestamp(fulfill_item_unit_reserved_status_b2c_actual_time)+(150 * 60))> from_unixtime(unix_timestamp(fulfill_item_unit_dispatch_expected_datetime)),'01_Fulfilment_Breach',
+												IF(
+													from_unixtime(unix_timestamp(order_item_max_on_hold_time)+(150 * 60))> from_unixtime(unix_timestamp(fulfill_item_unit_dispatch_expected_datetime)),'02_CS_Breach',
+														IF(
+															isnull(fulfill_item_unit_dispatch_actual_datetime) AND from_unixtime(unix_timestamp())> from_unixtime(unix_timestamp(fulfill_item_unit_dispatch_expected_datetime)),'03_DC_Breach',
+																IF(
+																	NOT(isnull(fulfill_item_unit_dispatch_actual_datetime))	AND from_unixtime(unix_timestamp(fulfill_item_unit_dispatch_actual_datetime)) > from_unixtime(unix_timestamp(fulfill_item_unit_dispatch_expected_datetime)),'03_DC_Breach',
+																		IF(
+																			isnull(shipment_first_consignment_create_datetime) AND from_unixtime(unix_timestamp())> from_unixtime(unix_timestamp(fulfill_item_unit_dispatch_expected_datetime)+(120 * 60)),'04_MH_Breach',
+																				IF(
+																					NOT(isnull(shipment_first_consignment_create_datetime)) AND from_unixtime(unix_timestamp(shipment_first_consignment_create_datetime)) > from_unixtime(unix_timestamp(fulfill_item_unit_dispatch_expected_datetime)+(120 * 60)),'04_MH_Breach',
+																						IF(
+																							isnull(fsd_assignedhub_received_time) AND from_unixtime(unix_timestamp())> from_unixtime(unix_timestamp(fsd_assigned_hub_expected_receive_datetime)),'05_LH_Breach',
+																								IF(
+																									NOT(isnull(fsd_assignedhub_received_time)) AND from_unixtime(unix_timestamp(fsd_assignedhub_received_time)) > from_unixtime(unix_timestamp(fsd_assigned_hub_expected_receive_datetime)),'05_LH_Breach','06_LM_Breach'
+																								)
+																						)
+																				)
+																		)
+																)
+														)
+												)
+										)
+								)				
+						)
+				)
+		)		
+) AS breach_bucket,
+shipment_rto_create_time,
+cust_dependency_reason,
+first_ofd_runsheet_id,
+first_ofd_agent_id_key,
+order_delivered_flag, 
+runsheet_shipment_delivered_count,
+runsheet_shipment_total_count
 from
 (select
 oms.order_item_unit_quantity, oms.order_item_quantity, oms.order_item_selling_price, oms.order_item_type, oms.order_item_title, oms.order_item_unit_status, oms.order_item_unit_is_promised_date_updated, oms.order_item_sub_type, oms.order_id, oms.order_item_id, oms.order_item_unit_tracking_id, oms.order_item_sku, oms.order_item_category_id, oms.order_item_sub_status, oms.order_item_ship_group_id, oms.order_item_status, oms.order_item_unit_shipment_id, oms.order_item_unit_id, oms.order_item_unit_init_promised_datetime, oms.order_item_product_id, oms.order_item_product_id_key, oms.order_item_unit_seller_id, oms.order_item_unit_source_facility, oms.order_item_listing_id, oms.order_item_date, oms.order_item_date_key, oms.order_item_created_at, oms.order_item_unit_final_promised_date_use, oms.order_item_unit_final_promised_date_key, oms.order_item_last_update, oms.order_item_unit_new_promised_date, oms.order_shipping_address_id, oms.order_shipping_address_id_key, oms.order_external_id, oms.account_id, oms.order_item_max_approved_time, oms.order_item_max_on_hold_time, oms.tracking_id_type, oms.customer_promise_proactive_age, 
 ff.fulfill_item_unit_dispatch_actual_datetime, ff.fulfill_item_unit_dispatch_actual_date_key, ff.fulfill_item_unit_ship_actual_time, ff.fulfill_item_unit_dispatch_expected_datetime, ff.fulfill_item_unit_dispatch_expected_date_key, ff.fulfill_item_unit_ship_expected_time, ff.fulfillment_order_item_id, ff.fulfill_item_unit_id, ff.fulfill_item_unit_status, ff.shipment_merchant_reference_id, ff.fulfill_item_unit_updated_at, ff.fulfill_item_unit_region, ff.fulfill_item_unit_region_type, ff.fulfill_item_id, ff.fulfill_item_type, ff.fulfill_item_unit_deliver_after_time, ff.fulfill_item_unit_dispatch_after_time, ff.fulfill_item_unit_is_for_slotted_delivery, ff.fulfill_item_unit_reserved_status_b2c_actual_time, ff.fulfill_item_unit_reserved_status_expected_time, ff.fulfill_item_unit_delivered_status_expected_time, ff.fulfill_item_unit_delivered_status_id, ff.fulfill_item_unit_size, ff.fulfill_item_unit_reserved_status_b2b_actual_time, ff.slot_changed_created_at, ff.slot_changed_by,ff.slot_booking_ref_id, ff.customer_destination_pincode, ff.fc_breach_flag, ff.fc_pending_flag, ff.fc_pending_age, 
-sh.shipment_id, sh.vendor_tracking_id, sh.shipment_current_status, sh.shipment_current_status_datetime, sh.payment_type, sh.destination_pincode, sh.ekl_shipment_type, sh.customer_promise_datetime, sh.logistics_promise_datetime, sh.shipment_created_at_datetime, sh.shipment_created_at_date_key, sh.vendor_id, sh.vendor_id_key, sh.shipment_carrier, sh.fsd_assigned_hub_id, sh.fsd_assigned_hub_id_key, sh.fsd_last_current_hub_id, sh.fsd_last_current_hub_id_key, sh.fsd_last_current_hub_type, sh.ekl_billable_weight, sh.merchant_reference_id, sh.shipment_first_consignment_id, sh.shipment_last_consignment_id, sh.shipment_inscan_time, sh.fsd_last_received_time, sh.fsd_number_of_ofd_attempts, sh.fsd_assignedhub_expected_time, sh.fsd_assignedhub_received_time, sh.ekl_delivery_datetime, sh.ekl_delivery_date_key, sh.shipment_first_ofd_datetime, sh.shipment_last_ofd_datetime, sh.vendor_dispatch_datetime, sh.tpl_first_ofd_time, sh.tpl_last_ofd_time, sh.fsd_assigned_hub_sent_datetime, sh.openbox_reject_datetime, sh.merchant_id, sh.fsd_first_dh_received_datetime, sh.shipment_value, sh.runsheet_close_datetime, sh.COD_amount_to_collect, sh.shipment_first_consignment_create_datetime, sh.shipment_last_consignment_create_datetime, sh.shipment_origin_facility_id, sh.end_state_datetime, sh.shipment_first_consignment_conn_id, sh.shipment_last_consignment_conn_id, sh.shipment_first_consignment_eta_in_sec, sh.shipment_last_consignment_eta_in_sec, sh.fsd_current_customer_dependency_flag, sh.shipment_dh_pending_flag, sh.ekl_pending_flag, sh.openbox_reject_flag, sh.shipment_dh_days_for_delivery, sh.first_attempt_delivery_flag, 
+sh.shipment_id, sh.vendor_tracking_id, sh.shipment_current_status, sh.shipment_current_status_datetime, sh.payment_type, sh.destination_pincode, sh.ekl_shipment_type, sh.customer_promise_datetime, sh.logistics_promise_datetime, sh.shipment_created_at_datetime, sh.shipment_created_at_date_key, sh.vendor_id, sh.vendor_id_key, sh.shipment_carrier, sh.fsd_assigned_hub_id, sh.fsd_assigned_hub_id_key, sh.fsd_last_current_hub_id, sh.fsd_last_current_hub_id_key, sh.fsd_last_current_hub_type, sh.ekl_billable_weight, sh.merchant_reference_id, sh.shipment_first_consignment_id, sh.shipment_last_consignment_id, sh.shipment_inscan_time, sh.fsd_last_received_time, sh.fsd_number_of_ofd_attempts, sh.fsd_assignedhub_expected_time, sh.fsd_assignedhub_received_time, sh.ekl_delivery_datetime, sh.ekl_delivery_date_key, sh.shipment_first_ofd_datetime, sh.shipment_last_ofd_datetime, sh.vendor_dispatch_datetime, sh.tpl_first_ofd_time, sh.tpl_last_ofd_time, sh.fsd_assigned_hub_sent_datetime, sh.openbox_reject_datetime, sh.merchant_id, sh.fsd_first_dh_received_datetime, sh.shipment_value, sh.runsheet_close_datetime, sh.COD_amount_to_collect, sh.shipment_first_consignment_create_datetime, sh.shipment_last_consignment_create_datetime, sh.shipment_origin_facility_id, sh.end_state_datetime, sh.shipment_first_consignment_conn_id, sh.shipment_last_consignment_conn_id, sh.shipment_first_consignment_eta_in_sec, sh.shipment_last_consignment_eta_in_sec, sh.fsd_current_customer_dependency_flag, sh.shipment_dh_pending_flag, sh.ekl_pending_flag, sh.openbox_reject_flag, sh.shipment_dh_days_for_delivery, sh.first_attempt_delivery_flag,sh.shipment_rto_create_time, 
 st.slot_id, st.slot_code, st.slot_facility_id, st.slot_facility_id_key, st.slot_start_date, st.slot_start_date_key, st.slot_end_date, st.slot_actual_capacity, st.slot_shipment_size, st.slot_duration, st.slot_booking_id, st.slot_reservation_status, 
 prod.product_categorization_hive_dim_key, prod.order_item_product_title, prod.analytic_super_category, prod.order_item_brand, prod.analytic_vertical, prod.analytic_category, 
 facility_1.slot_facility_name,
@@ -117,8 +323,16 @@ hub.pincode_hub_zone as calculated_delivery_hub_zone,
 sh.shipment_origin_facility_id_key,
 ff.fulfill_item_unit_final_reserved_datetime,
 lookup_date(ff.fulfill_item_unit_final_reserved_datetime) as fulfill_item_unit_final_reserved_date_key,
-if(isnull(shipment_last_consignment_eta_in_sec), 0 , from_unixtime(unix_timestamp(fulfill_item_unit_dispatch_expected_datetime) + 7200 +
- shipment_last_consignment_eta_in_sec)) as fsd_assigned_hub_expected_receive_datetime,
+CASE 
+WHEN fulfill_item_unit_is_for_slotted_delivery='NotSlotted' THEN to_utc_timestamp(concat(substr(order_item_unit_final_promised_date_key,1,4),'-',substr(order_item_unit_final_promised_date_key,5,2),'-',substr(order_item_unit_final_promised_date_key,7,2),' 06:00:00'),'')
+WHEN fulfill_item_unit_is_for_slotted_delivery='Slotted' 
+THEN 
+to_utc_timestamp(from_unixtime(IF(unix_timestamp(shipment_last_consignment_eta_datetime) >=
+unix_timestamp(fulfill_item_unit_dispatch_expected_datetime) + 7200 + unix_timestamp(shipment_last_consignment_eta_datetime) - unix_timestamp(shipment_first_consignment_create_datetime),
+unix_timestamp(shipment_last_consignment_eta_datetime),
+unix_timestamp(fulfill_item_unit_dispatch_expected_datetime) + 7200 + unix_timestamp(shipment_last_consignment_eta_datetime) - unix_timestamp(shipment_first_consignment_create_datetime)
+)),'')
+END AS fsd_assigned_hub_expected_receive_datetime,
 first_conn.first_conn_cutoff_in_sec,
 last_conn.last_conn_cutoff_in_sec,
 if(isnull(shipment_last_consignment_create_datetime),0,
@@ -138,7 +352,14 @@ THEN 'COD'
 ELSE 'Prepaid'
 END) AS order_payment_type,
 on_hold.onhold_reason as onhold_reason,
-on_hold.order_item_status_change_sub_reason as onhold_sub_reason
+on_hold.order_item_status_change_sub_reason as onhold_sub_reason,
+cd.customer_dependency_flag as customer_dependency_flag,
+cd.cust_dependency_reason as cust_dependency_reason,
+ofd_runsheet.tasklist_id as first_ofd_runsheet_id,
+ofd_runsheet.primary_agent_id as first_ofd_agent_id_key,
+ofd_runsheet.order_delivered_flag as order_delivered_flag, 
+runsheet_data.runsheet_delivered_count as runsheet_shipment_delivered_count,
+runsheet_data.runsheet_total_count as runsheet_shipment_total_count
 from
 (select 
 order_item_unit_quantity, order_item_quantity, order_item_selling_price, order_item_type, order_item_title, order_item_unit_status, order_item_unit_is_promised_date_updated, order_item_sub_type, order_id, order_item_id, order_item_unit_tracking_id, order_item_sku, order_item_category_id, order_item_sub_status, order_item_ship_group_id, order_item_status, order_item_unit_shipment_id, order_item_unit_id, order_item_unit_init_promised_datetime, order_item_product_id, order_item_unit_seller_id, order_item_unit_source_facility, order_item_listing_id, order_item_date, order_item_created_at, order_item_unit_final_promised_date_use, order_item_last_update, order_item_unit_new_promised_date, order_shipping_address_id, order_external_id, account_id, order_item_max_approved_time, order_item_max_on_hold_time, tracking_id_type, 
@@ -199,10 +420,11 @@ if(isnull(fulfill_item_unit_reserved_status_b2c_actual_time),fulfill_item_unit_r
 if(fulfill_item_unit_reserved_status_b2b_actual_time<fulfill_item_unit_reserved_status_b2c_actual_time,fulfill_item_unit_reserved_status_b2b_actual_time,
 fulfill_item_unit_reserved_status_b2c_actual_time))) as fulfill_item_unit_final_reserved_datetime
 from bigfoot_external_neo.scp_ekl__la_14d_fulfillment_fact) ff
-on (oms.order_item_id=ff.fulfillment_order_item_id)
+on (oms.order_item_id=ff.fulfillment_order_item_id
+AND oms.order_item_unit_shipment_id <=> ff.shipment_merchant_reference_id)
 left outer join
 (select
-shipment_id, vendor_tracking_id, shipment_current_status, shipment_current_status_datetime, payment_type, destination_pincode, ekl_shipment_type, customer_promise_datetime, logistics_promise_datetime, shipment_created_at_datetime, vendor_id, shipment_carrier, fsd_assigned_hub_id, fsd_last_current_hub_id, fsd_last_current_hub_type, ekl_billable_weight, merchant_reference_id, shipment_first_consignment_id, shipment_last_consignment_id, shipment_inscan_time, fsd_last_received_time, fsd_number_of_ofd_attempts, fsd_assignedhub_expected_time, fsd_assignedhub_received_time, ekl_delivery_datetime, shipment_first_ofd_datetime, shipment_last_ofd_datetime, vendor_dispatch_datetime, tpl_first_ofd_time, tpl_last_ofd_time, fsd_assigned_hub_sent_datetime, openbox_reject_datetime, merchant_id, fsd_first_dh_received_datetime, shipment_value, runsheet_close_datetime, COD_amount_to_collect, shipment_first_consignment_create_datetime, shipment_last_consignment_create_datetime, shipment_origin_facility_id, end_state_datetime, shipment_first_consignment_conn_id, shipment_last_consignment_conn_id, shipment_first_consignment_eta_in_sec, shipment_last_consignment_eta_in_sec, 
+shipment_id, vendor_tracking_id, shipment_current_status, shipment_current_status_datetime, payment_type, destination_pincode, ekl_shipment_type, customer_promise_datetime, logistics_promise_datetime, shipment_created_at_datetime, vendor_id, shipment_carrier, fsd_assigned_hub_id, fsd_last_current_hub_id, fsd_last_current_hub_type, ekl_billable_weight, merchant_reference_id, shipment_first_consignment_id, shipment_last_consignment_id, shipment_inscan_time, fsd_last_received_time, fsd_number_of_ofd_attempts, fsd_assignedhub_expected_time, fsd_assignedhub_received_time, ekl_delivery_datetime, shipment_first_ofd_datetime, shipment_last_ofd_datetime, vendor_dispatch_datetime, tpl_first_ofd_time, tpl_last_ofd_time, fsd_assigned_hub_sent_datetime, openbox_reject_datetime, merchant_id, fsd_first_dh_received_datetime, shipment_value, runsheet_close_datetime, COD_amount_to_collect, shipment_first_consignment_create_datetime, shipment_last_consignment_create_datetime, shipment_origin_facility_id, end_state_datetime, shipment_first_consignment_conn_id, shipment_last_consignment_conn_id, shipment_first_consignment_eta_in_sec, shipment_last_consignment_eta_in_sec, shipment_last_consignment_eta_datetime,shipment_rto_create_time,
 lookup_date(shipment_created_at_datetime) as shipment_created_at_date_key,
 lookupkey('vendor_id',vendor_id) as vendor_id_key,
 lookupkey('facility_id',fsd_assigned_hub_id) as fsd_assigned_hub_id_key,
@@ -225,32 +447,37 @@ if(ekl_shipment_type='forward',if(not isnull(ekl_delivery_datetime) and fsd_numb
 from bigfoot_external_neo.scp_ekl__la_14d_shipment_fact) sh
 on oms.order_item_unit_shipment_id=sh.merchant_reference_id
 left outer join
-(select
-slot_id, slot_code, slot_facility_id, slot_start_date, slot_end_date, slot_actual_capacity, slot_shipment_size, slot_duration, slot_booking_id, slot_reservation_status, 
+(
+Select slot.slot_id, slot_code, slot_facility_id, slot_start_date, slot_end_date, slot_actual_capacity, slot_shipment_size, slot_duration, slot.slot_booking_id, slot_reservation_status, 
 vendor_tracking_id,
 lookupkey('facility_id',slot_facility_id) as slot_facility_id_key,
 lookup_date(slot_start_date) as slot_start_date_key
-from bigfoot_external_neo.scp_ekl__la_14d_slot_fact) st
+FROM (
+select slot_booking_id,max(slot_id)as slot_id from bigfoot_external_neo.scp_ekl__la_14d_slot_fact group by slot_booking_id) slot
+JOIN bigfoot_external_neo.scp_ekl__la_14d_slot_fact slot1
+ON slot.slot_id = slot1.slot_id
+AND slot.slot_booking_id = slot1.slot_booking_id) st
 on ff.slot_booking_ref_id=st.slot_booking_id
+and sh.vendor_tracking_id = st.vendor_tracking_id
 left outer join
 (select product_categorization_hive_dim_key,title as order_item_product_title, analytic_super_category, brand as order_item_brand,analytic_vertical, analytic_category
 from bigfoot_external_neo.sp_product__product_categorization_hive_dim) prod
 on prod.product_categorization_hive_dim_key=oms.order_item_product_id_key
 left outer join
 (select
-ekl_facility_hive_dim_key, name as slot_facility_name, zone as slot_facility_zone, type as slot_facility_type
-from bigfoot_external_neo.scp_ekl__ekl_facility_hive_dim) facility_1
-on facility_1.ekl_facility_hive_dim_key=st.slot_facility_id_key
+ekl_hive_facility_dim_key, name as slot_facility_name, zone as slot_facility_zone, type as slot_facility_type
+from bigfoot_external_neo.scp_ekl__ekl_hive_facility_dim) facility_1
+on facility_1.ekl_hive_facility_dim_key=st.slot_facility_id_key
 left outer join
 (select
-ekl_facility_hive_dim_key, name as fsd_last_current_hub_name, zone as fsd_last_current_hub_zone
-from bigfoot_external_neo.scp_ekl__ekl_facility_hive_dim) facility_2
-on facility_2.ekl_facility_hive_dim_key=sh.fsd_last_current_hub_id_key
+ekl_hive_facility_dim_key, name as fsd_last_current_hub_name, zone as fsd_last_current_hub_zone
+from bigfoot_external_neo.scp_ekl__ekl_hive_facility_dim) facility_2
+on facility_2.ekl_hive_facility_dim_key=sh.fsd_last_current_hub_id_key
 left outer join
 (select
-ekl_facility_hive_dim_key, name as fsd_assigned_hub_name, zone as fsd_assigned_hub_zone, type as fsd_assigned_hub_type
-from bigfoot_external_neo.scp_ekl__ekl_facility_hive_dim) facility_3
-on facility_3.ekl_facility_hive_dim_key=sh.fsd_assigned_hub_id_key
+ekl_hive_facility_dim_key, name as fsd_assigned_hub_name, zone as fsd_assigned_hub_zone, type as fsd_assigned_hub_type
+from bigfoot_external_neo.scp_ekl__ekl_hive_facility_dim) facility_3
+on facility_3.ekl_hive_facility_dim_key=sh.fsd_assigned_hub_id_key
 left outer join
 (select logistics_vendor_hive_dim_key, vendor_name as shipment_vendor_name, carrier as shipment_carrier_2
 from bigfoot_external_neo.scp_ekl__logistics_vendor_hive_dim) vendors
@@ -289,4 +516,24 @@ hub_name as customer_pincode_hub,
 hub_zone as customer_pincode_hub_zone
 from bigfoot_common.large_pincode_hub_mapping) cust_hub
 on cust_hub.customer_address_pincode=cust_add.cust_add_pincode
-) A;
+left outer join bigfoot_external_neo.scp_ekl__customer_dependency_14_fact cd on cd.vendor_tracking_id = sh.vendor_tracking_id
+left outer join 
+(select distinct
+vendor_tracking_id,
+tasklist_id,
+primary_agent_id,
+shipment_actioned_flag as order_delivered_flag 
+from bigfoot_external_neo.scp_ekl__runsheet_shipment_map_l1_fact
+where attempt_no =1
+) ofd_runsheet 
+on ofd_runsheet.vendor_tracking_id = sh.vendor_tracking_id
+left outer join 
+(select 
+tasklist_id,
+sum(shipment_actioned_flag) as runsheet_delivered_count,
+count(distinct vendor_tracking_id) as runsheet_total_count
+from bigfoot_external_neo.scp_ekl__runsheet_shipment_map_l1_fact
+group by tasklist_id
+) runsheet_data 
+on runsheet_data.tasklist_id = ofd_runsheet.tasklist_id 
+)A;
